@@ -10,15 +10,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/jpignata/fargate/console"
-	ECS "github.com/jpignata/fargate/ecs"
+	"github.com/turnerlabs/fargate/console"
+	ECS "github.com/turnerlabs/fargate/ecs"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 const (
-	version = "0.2.3"
-
 	defaultClusterName = "fargate"
 	defaultRegion      = "us-east-1"
 
@@ -158,7 +156,8 @@ CloudWatch Logs, and Amazon Route 53 into an easy-to-use CLI.`,
 	},
 }
 
-func Execute() {
+// Execute ...
+func Execute(version string) {
 	rootCmd.Version = version
 	rootCmd.Execute()
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	awsecs "github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/jpignata/fargate/console"
+	"github.com/turnerlabs/fargate/console"
 )
 
 type CreateServiceInput struct {

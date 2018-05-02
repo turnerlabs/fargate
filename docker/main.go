@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/jpignata/fargate/console"
+	"github.com/turnerlabs/fargate/console"
 )
 
 const timestampFormat = "20060102150405"
