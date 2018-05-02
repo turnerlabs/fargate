@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/jpignata/fargate/console"
-	ECS "github.com/jpignata/fargate/ecs"
+	"github.com/turnerlabs/fargate/console"
+	ECS "github.com/turnerlabs/fargate/ecs"
 	"github.com/spf13/cobra"
 )
 
