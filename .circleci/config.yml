@@ -19,7 +19,7 @@ jobs:
           name: multi-platform build (for develop and master)
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "develop" ]; then
-              make xplat-build
+              make dist
             fi
       - run:
           name: deploy develop to github pre-release
