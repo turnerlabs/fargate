@@ -79,7 +79,7 @@ Thanks for your interest in the project!  We want to welcome contributors so we 
 
 ## Release Process
 
-* After a feature pull request has been merged into the `develop` branch, a CI build will be automatically kicked off.  The CI build will run unit tests, do a multi-platform build and automatically deploy the build to the [Github releases](releases) page as a pre-release using the latest tag (`git describe --tags`) as the version number.
+* After a feature pull request has been merged into the `develop` branch, a CI build will be automatically kicked off.  The CI build will run unit tests, do a multi-platform build and automatically deploy the build to the [Github releases](https://github.com/turnerlabs/fargate/releases) page as a pre-release using the latest tag (`git describe --tags`) as the version number.
 * After the core team decides which features will be included in the next release, a release branch is created (e.g., `release/v0.5`) from develop.
 * The `CHANGELOG.md` file is updated to document the release in the release branch.
 * The release branch is merged to `master`, tagged, and pushed (along with tags).
