@@ -36,7 +36,7 @@ the AWS SDK for Go documentation.
 
 #### Options
 
-There are several ways to specify parameters.  Each item takes precendence over the item below it:
+There are several ways to specify parameters.  Each item takes precedence over the item below it:
 
 1. CLI arguments (e.g., `--cluster my-cluster`)
 
