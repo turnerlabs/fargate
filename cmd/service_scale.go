@@ -18,7 +18,7 @@ type ScaleServiceOperation struct {
 }
 
 func (o *ScaleServiceOperation) SetScale(scaleExpression string) {
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 	validScale := regexp.MustCompile(validScalePattern)
 
 	if !validScale.MatchString(scaleExpression) {
@@ -46,20 +46,20 @@ func (o *ScaleServiceOperation) SetScale(scaleExpression string) {
 }
 
 var serviceScaleCmd = &cobra.Command{
-	Use:   "scale <service-name> <scale-expression>",
+	Use:   "scale <scale-expression>",
 	Short: "Changes the number of tasks running for the service",
 	Long: `Scale number of tasks in a service
 
 Changes the number of desired tasks to be run in a service by the given scale
 expression. A scale expression can either be an absolute number or a delta
 specified with a sign such as +5 or -2.`,
-	Args: cobra.ExactArgs(2),
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ScaleServiceOperation{
-			ServiceName: args[0],
+			ServiceName: getServiceName(),
 		}
 
-		operation.SetScale(args[1])
+		operation.SetScale(args[0])
 
 		scaleService(operation)
 	},
@@ -70,7 +70,7 @@ func init() {
 }
 
 func scaleService(operation *ScaleServiceOperation) {
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 
 	ecs.SetDesiredCount(operation.ServiceName, operation.DesiredCount)
 	console.Info("Scaled service %s to %d", operation.ServiceName, operation.DesiredCount)
