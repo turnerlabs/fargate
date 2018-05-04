@@ -18,6 +18,12 @@ tasks running. Services can be used in concert with a load balancer to
 distribute traffic amongst the tasks in your service.`,
 }
 
+var serviceName string
+
 func init() {
 	rootCmd.AddCommand(serviceCmd)
+
+	serviceCmd.PersistentFlags().StringVarP(&serviceName, "service", "s", "", `ECS service name`)
+
+	initPFlag(keyService, serviceCmd)
 }

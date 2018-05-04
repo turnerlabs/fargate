@@ -1,6 +1,6 @@
 # Fargate CLI
 
-CLI for [AWS Fargate](https://aws.amazon.com/fargate/)
+Deploy serverless containers to the cloud from your command line
 
 [![CircleCI](https://circleci.com/gh/turnerlabs/fargate/tree/master.svg?style=svg)](https://circleci.com/gh/turnerlabs/fargate/tree/master)
 [![GoDoc](https://godoc.org/github.com/turnerlabs/fargate?status.svg)](https://godoc.org/github.com/turnerlabs/fargate)
@@ -34,18 +34,35 @@ in the following locations:
 For more information see [Specifying Credentials][go-specifying-credentials] in
 the AWS SDK for Go documentation.
 
-### Commands
+#### Options
 
-- [Services](#services)
+There are several ways to specify parameters.  Each item takes precedence over the item below it:
+
+1. CLI arguments (e.g., `--cluster my-cluster`)
+
+1. Environment Variables (e.g., `FARGATE_CLUSTER=my-cluster`)
+
+1. `fargate.yml` (e.g., below)
+
+```yaml
+cluster: my-cluster
+service: my-service
+verbose: false
+nocolor: true
+```
 
 #### Global Flags
 
-| Flag | Default | Description |
-| --- | --- | --- |
-| --cluster | fargate | ECS cluster name |
-| --region | us-east-1 | AWS region |
-| --no-color | false | Disable color output |
-| --verbose | false | Verbose output |
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --cluster | -c | | ECS cluster name |
+| --region | | us-east-1 | AWS region |
+| --no-color | | false | Disable color output |
+| --verbose | -v | false | Verbose output |
+
+### Commands
+
+- [Services](#services)
 
 #### Services
 
@@ -67,6 +84,12 @@ distribute traffic amongst the tasks in your service.
 - [update](#fargate-service-update)
 - [restart](#fargate-service-restart)
 
+##### Flags
+
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --service | -s | | ECS service name |
+
 ##### fargate service list
 
 ```console
@@ -75,20 +98,10 @@ fargate service list
 
 List services
 
-##### fargate service create
-
-```console
-fargate service create <service name> [--cpu <cpu units>] [--memory <MiB>] [--port <port-expression>]
-                                      [--lb <load-balancer-name>] [--rule <rule-expression>]
-                                      [--image <docker-image>] [--env <key=value>] [--num <count>]
-                                      [--task-role <task-role>] [--subnet-id <subnet-id>]
-                                      [--security-group-id <security-group-id>]
-```
-
 ##### fargate service deploy
 
 ```console
-fargate service deploy <service-name> [--image <docker-image>]
+fargate service deploy [--image <docker-image>]
 ```
 
 Deploy new image to service
@@ -103,7 +116,7 @@ HEAD commit. If not, a timestamp in the format of YYYYMMDDHHMMSS will be used.
 ##### fargate service info
 
 ```console
-fargate service info <service-name>
+fargate service info 
 ```
 
 Inspect service
@@ -118,8 +131,8 @@ update to configuration such a CPU, memory, or environment variables.
 ##### fargate service logs
 
 ```console
-fargate service logs <service-name> [--follow] [--start <time-expression>] [--end <time-expression>]
-                                    [--filter <filter-expression>] [--task <task-id>]
+fargate service logs [--follow] [--start <time-expression>] [--end <time-expression>]
+                     [--filter <filter-expression>] [--task <task-id>]
 ```
 
 Show logs from tasks in a service
@@ -152,7 +165,7 @@ documentation][cwl-filter-expression] for more details.
 ##### fargate service ps
 
 ```console
-fargate service ps <service-name>
+fargate service ps
 ```
 
 List running tasks for a service
@@ -160,7 +173,7 @@ List running tasks for a service
 ##### fargate service scale
 
 ```console
-fargate service scale <service-name> <scale-expression>
+fargate service scale <scale-expression>
 ```
 
 Scale number of tasks in a service
@@ -172,7 +185,7 @@ specified with a sign such as +5 or -2.
 ##### fargate service env set
 
 ```console
-fargate service env set <service-name> --env <key=value>
+fargate service env set --env <key=value>
 ```
 
 Set environment variables
@@ -183,7 +196,7 @@ At least one environment variable must be specified via the --env flag. Specify
 ##### fargate service env unset
 
 ```console
-fargate service env unset <service-name> --key <key-name>
+fargate service env unset --key <key-name>
 ```
 
 Unset environment variables
@@ -194,15 +207,20 @@ a key name multiple times to unset multiple variables.
 ##### fargate service env list
 
 ```console
-fargate service env list <service-name>
+fargate service env list
 ```
 
 Show environment variables
 
 ##### fargate service update
 
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --cpu | | | Amount of cpu units to allocate for each task |
+| --memory | -m | | Amount of MiB to allocate for each task |
+
 ```console
-fargate service update <service-name> [--cpu <cpu-units>] [--memory <MiB>]
+fargate service update [--cpu <cpu-units>] [--memory <MiB>]
 ```
 
 Update service configuration
@@ -225,7 +243,7 @@ At least one of --cpu or --memory must be specified.
 ##### fargate service restart
 
 ```console
-fargate service restart <service-name>
+fargate service restart 
 ```
 
 Restart service

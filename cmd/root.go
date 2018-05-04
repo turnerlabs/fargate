@@ -10,9 +10,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
 	ECS "github.com/turnerlabs/fargate/ecs"
-	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -73,17 +73,12 @@ CloudWatch Logs, and Amazon Route 53 into an easy-to-use CLI.`,
 			return
 		}
 
-		if verbose {
-			verbose = true
-			console.Verbose = true
-			output.Verbose = true
-		}
+		console.Verbose = getVerbose()
+		output.Verbose = getVerbose()
 
 		if terminal.IsTerminal(int(os.Stdout.Fd())) {
-			if !noColor {
-				console.Color = true
-				output.Color = true
-			}
+			console.Color = !getNoColor()
+			output.Color = !getNoColor()
 
 			if runtime.GOOS == runtimeMacOS && !noEmoji {
 				output.Emoji = true
@@ -115,7 +110,7 @@ CloudWatch Logs, and Amazon Route 53 into an easy-to-use CLI.`,
 			Region: aws.String(region),
 		}
 
-		if verbose {
+		if getVerbose() {
 			config.LogLevel = aws.LogLevel(aws.LogDebugWithHTTPBody)
 		}
 
@@ -138,21 +133,6 @@ CloudWatch Logs, and Amazon Route 53 into an easy-to-use CLI.`,
 				console.ErrorExit(err, "Could not create create AWS session")
 			}
 		}
-
-		if clusterName == "" {
-			clusterName = defaultClusterName
-			ecs := ECS.New(sess, clusterName)
-
-			output.Debug("Creating default cluster [API=ecs Action=CreateCluster]")
-
-			arn, err := ecs.CreateCluster()
-
-			if err == nil {
-				output.Debug("Created default cluster [ARN=%s]", arn)
-			} else {
-				output.Fatal(err, "Could not create default cluster")
-			}
-		}
 	},
 }
 
@@ -163,14 +143,17 @@ func Execute(version string) {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
+
 	rootCmd.PersistentFlags().StringVar(&region, "region", "", `AWS region (default "us-east-1")`)
-	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Disable color output")
-	rootCmd.PersistentFlags().StringVar(&clusterName, "cluster", "", `ECS cluster name (default "fargate")`)
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
+	rootCmd.PersistentFlags().BoolVar(&noColor, "nocolor", false, "Disable color output")
+	rootCmd.PersistentFlags().StringVarP(&clusterName, "cluster", "c", "", `ECS cluster name`)
 
 	if runtime.GOOS == runtimeMacOS {
 		rootCmd.PersistentFlags().BoolVar(&noEmoji, "no-emoji", false, "Disable emoji output")
 	}
+
+	initConfig(rootCmd)
 }
 
 func extractEnvVars(inputEnvVars []string) []ECS.EnvVar {

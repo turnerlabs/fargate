@@ -4,3 +4,4 @@ fargate
 dist
 vendor
 Dockerfile.build
+fargate.yml

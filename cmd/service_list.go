@@ -30,7 +30,7 @@ func listServices() {
 	targetGroups := make(map[string]ELBV2.TargetGroup)
 	loadBalancers := make(map[string]ELBV2.LoadBalancer)
 
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 	elbv2 := ELBV2.New(sess)
 	services := ecs.ListServices()
 

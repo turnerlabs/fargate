@@ -16,7 +16,7 @@ type ServiceUpdateOperation struct {
 }
 
 func (o *ServiceUpdateOperation) Validate() {
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 
 	if o.Cpu == "" && o.Memory == "" {
 		console.ErrorExit(fmt.Errorf("--cpu and/or --memory must be supplied"), "Invalid command line arguments")
@@ -46,7 +46,7 @@ var (
 )
 
 var serviceUpdateCmd = &cobra.Command{
-	Use:   "update <service-name> --cpu <cpu-units> | --memory <MiB>",
+	Use:   "update --cpu <cpu-units> | --memory <MiB>",
 	Short: "Update service configuration",
 	Long: `Update service configuration
 
@@ -64,10 +64,9 @@ configurations:
 | 4096            | 8192 through 30720 in 1GiB increments |
 
 At least one of --cpu or --memory must be specified.`,
-	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceUpdateOperation{
-			ServiceName: args[0],
+			ServiceName: getServiceName(),
 			Cpu:         flagServiceUpdateCpu,
 			Memory:      flagServiceUpdateMemory,
 		}
@@ -81,12 +80,12 @@ At least one of --cpu or --memory must be specified.`,
 func init() {
 	serviceCmd.AddCommand(serviceUpdateCmd)
 
-	serviceUpdateCmd.Flags().StringVarP(&flagServiceUpdateCpu, "cpu", "c", "", "Amount of cpu units to allocate for each task")
+	serviceUpdateCmd.Flags().StringVar(&flagServiceUpdateCpu, "cpu", "", "Amount of cpu units to allocate for each task")
 	serviceUpdateCmd.Flags().StringVarP(&flagServiceUpdateMemory, "memory", "m", "", "Amount of MiB to allocate for each task")
 }
 
 func updateService(operation *ServiceUpdateOperation) {
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 
 	newTaskDefinitionArn := ecs.UpdateTaskDefinitionCpuAndMemory(
 		operation.Service.TaskDefinitionArn,

@@ -11,12 +11,11 @@ type ServiceEnvListOperation struct {
 }
 
 var serviceEnvListCmd = &cobra.Command{
-	Use:   "list <service-name>",
+	Use:   "list",
 	Short: "Show environment variables",
-	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceEnvListOperation{
-			ServiceName: args[0],
+			ServiceName: getServiceName(),
 		}
 
 		serviceEnvList(operation)
@@ -28,7 +27,7 @@ func init() {
 }
 
 func serviceEnvList(operation *ServiceEnvListOperation) {
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 	service := ecs.DescribeService(operation.ServiceName)
 	envVars := ecs.GetEnvVarsFromTaskDefinition(service.TaskDefinitionArn)
 

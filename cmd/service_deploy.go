@@ -17,7 +17,7 @@ type ServiceDeployOperation struct {
 var flagServiceDeployImage string
 
 var serviceDeployCmd = &cobra.Command{
-	Use:   "deploy <service-name>",
+	Use:   "deploy",
 	Short: "Deploy new image to service",
 	Long: `Deploy new image to service
 
@@ -27,10 +27,9 @@ container image from the current working directory and push it to Amazon ECR in
 a repository named for the task group. If the current working directory is a
 git repository, the container image will be tagged with the short ref of the
 HEAD commit. If not, a timestamp in the format of YYYYMMDDHHMMSS will be used.`,
-	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceDeployOperation{
-			ServiceName: args[0],
+			ServiceName: getServiceName(),
 			Image:       flagServiceDeployImage,
 		}
 
@@ -45,7 +44,7 @@ func init() {
 }
 
 func deployService(operation *ServiceDeployOperation) {
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 	service := ecs.DescribeService(operation.ServiceName)
 
 	if operation.Image == "" {
