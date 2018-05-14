@@ -106,12 +106,9 @@ fargate service deploy [--image <docker-image>]
 
 Deploy new image to service
 
-The Docker container image to use in the service can be optionally specified
-via the --image flag. If not specified, fargate will build a new Docker
-container image from the current working directory and push it to Amazon ECR in
-a repository named for the task group. If the current working directory is a
-git repository, the container image will be tagged with the short ref of the
-HEAD commit. If not, a timestamp in the format of YYYYMMDDHHMMSS will be used.
+The Docker container image to use in the service can be specified
+via the --image flag.
+
 
 ```console
 fargate service deploy [--file docker-compose.yml]
