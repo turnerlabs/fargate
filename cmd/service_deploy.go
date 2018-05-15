@@ -3,11 +3,8 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
-	"github.com/turnerlabs/fargate/docker"
 	"github.com/turnerlabs/fargate/dockercompose"
-	ECR "github.com/turnerlabs/fargate/ecr"
 	ECS "github.com/turnerlabs/fargate/ecs"
-	"github.com/turnerlabs/fargate/git"
 )
 
 // ServiceDeployOperation represents a deploy operation
@@ -33,15 +30,8 @@ via the --image flag.
 The docker-compose.yml format is also supported using the --file flag.
 If -f is specified, the image and the environment variables in the 
 docker-compose.yml file will be deployed.
-
-If no args are specified, fargate will build a new Docker container image from the 
-current working directory and push it to Amazon ECR in a repository named for
-the task group. If the current working directory is a git repository, 
-the container image will be tagged with the short ref of the HEAD commit. 
-If not, a timestamp in the format of YYYYMMDDHHMMSS will be used.
 `,
 	Example: `
-fargate service deploy
 fargate service deploy -i 123456789.dkr.ecr.us-east-1.amazonaws.com/my-service:1.0
 fargate service deploy -f docker-compose.yml
 `,
@@ -56,7 +46,7 @@ fargate service deploy -f docker-compose.yml
 }
 
 func init() {
-	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployImage, "image", "i", "", "Docker image to run in the service; if omitted Fargate will build an image from the Dockerfile in the current directory")
+	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployImage, "image", "i", "", "Docker image to run in the service")
 
 	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployDockerComposeFile, "file", "f", "", "Specify a docker-compose.yml file to deploy. The image and environment variables in the file will be deployed.")
 
@@ -72,27 +62,6 @@ func deployService(operation *ServiceDeployOperation) {
 
 	ecs := ECS.New(sess, getClusterName())
 	service := ecs.DescribeService(operation.ServiceName)
-
-	if operation.Image == "" {
-		var tag string
-
-		ecr := ECR.New(sess)
-		repositoryUri := ecr.GetRepositoryUri(operation.ServiceName)
-		repository := docker.Repository{Uri: repositoryUri}
-		username, password := ecr.GetUsernameAndPassword()
-
-		if git.IsCwdGitRepo() {
-			tag = git.GetShortSha()
-		} else {
-			tag = docker.GenerateTag()
-		}
-
-		repository.Login(username, password)
-		repository.Build(tag)
-		repository.Push(tag)
-
-		operation.Image = repository.UriFor(tag)
-	}
 
 	taskDefinitionArn := ecs.UpdateTaskDefinitionImage(service.TaskDefinitionArn, operation.Image)
 	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
