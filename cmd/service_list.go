@@ -5,9 +5,9 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/jpignata/fargate/console"
-	ECS "github.com/jpignata/fargate/ecs"
-	ELBV2 "github.com/jpignata/fargate/elbv2"
+	"github.com/turnerlabs/fargate/console"
+	ECS "github.com/turnerlabs/fargate/ecs"
+	ELBV2 "github.com/turnerlabs/fargate/elbv2"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +30,7 @@ func listServices() {
 	targetGroups := make(map[string]ELBV2.TargetGroup)
 	loadBalancers := make(map[string]ELBV2.LoadBalancer)
 
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 	elbv2 := ELBV2.New(sess)
 	services := ecs.ListServices()
 

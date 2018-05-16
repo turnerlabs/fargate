@@ -7,11 +7,11 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	ACM "github.com/jpignata/fargate/acm"
-	"github.com/jpignata/fargate/console"
-	EC2 "github.com/jpignata/fargate/ec2"
-	ECS "github.com/jpignata/fargate/ecs"
-	ELBV2 "github.com/jpignata/fargate/elbv2"
+	ACM "github.com/turnerlabs/fargate/acm"
+	"github.com/turnerlabs/fargate/console"
+	EC2 "github.com/turnerlabs/fargate/ec2"
+	ECS "github.com/turnerlabs/fargate/ecs"
+	ELBV2 "github.com/turnerlabs/fargate/elbv2"
 	"github.com/spf13/cobra"
 )
 
@@ -22,7 +22,7 @@ type ServiceInfoOperation struct {
 }
 
 var serviceInfoCmd = &cobra.Command{
-	Use:   "info <service-name>",
+	Use:   "info",
 	Short: "Inspect service",
 	Long: `Inspect service
 
@@ -32,10 +32,9 @@ active deployments, and environment variables.
 Deployments show active versions of your service that are running. Multiple
 deployments are shown if a service is transitioning due to a deployment or
 update to configuration such a CPU, memory, or environment variables.`,
-	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceInfoOperation{
-			ServiceName: args[0],
+			ServiceName: getServiceName(),
 		}
 
 		getServiceInfo(operation)
@@ -50,7 +49,7 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 	var eniIds []string
 
 	acm := ACM.New(sess)
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 	ec2 := EC2.New(sess)
 	elbv2 := ELBV2.New(sess)
 	service := ecs.DescribeService(operation.ServiceName)
@@ -180,7 +179,7 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 		for i, event := range service.Events {
 			fmt.Printf("[%s] %s\n", event.CreatedAt, event.Message)
 
-			if i == 10 && !verbose {
+			if i == 10 && !getVerbose() {
 				break
 			}
 		}

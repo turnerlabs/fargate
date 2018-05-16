@@ -5,9 +5,9 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/jpignata/fargate/console"
-	EC2 "github.com/jpignata/fargate/ec2"
-	ECS "github.com/jpignata/fargate/ecs"
+	"github.com/turnerlabs/fargate/console"
+	EC2 "github.com/turnerlabs/fargate/ec2"
+	ECS "github.com/turnerlabs/fargate/ecs"
 	"github.com/spf13/cobra"
 )
 
@@ -16,12 +16,11 @@ type ServiceProcessListOperation struct {
 }
 
 var servicePsCmd = &cobra.Command{
-	Use:   "ps <service-name>",
+	Use:   "ps",
 	Short: "List running tasks for a service",
-	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceProcessListOperation{
-			ServiceName: args[0],
+			ServiceName: getServiceName(),
 		}
 
 		getServiceProcessList(operation)
@@ -35,7 +34,7 @@ func init() {
 func getServiceProcessList(operation *ServiceProcessListOperation) {
 	var eniIds []string
 
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 	ec2 := EC2.New(sess)
 	tasks := ecs.DescribeTasksForService(operation.ServiceName)
 

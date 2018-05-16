@@ -8,7 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	awsecs "github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/jpignata/fargate/console"
+	"github.com/turnerlabs/fargate/console"
 )
 
 const (
@@ -206,7 +206,7 @@ func (ecs *ECS) DescribeTasks(taskIds []string) []Task {
 		task := Task{
 			Cpu:           aws.StringValue(t.Cpu),
 			CreatedAt:     aws.TimeValue(t.CreatedAt),
-			DeploymentId:  ecs.getDeploymentId(aws.StringValue(t.TaskDefinitionArn)),
+			DeploymentId:  ecs.GetDeploymentId(aws.StringValue(t.TaskDefinitionArn)),
 			DesiredStatus: aws.StringValue(t.DesiredStatus),
 			LastStatus:    aws.StringValue(t.LastStatus),
 			Memory:        aws.StringValue(t.Memory),

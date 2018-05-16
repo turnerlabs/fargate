@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/jpignata/fargate/console"
-	ECS "github.com/jpignata/fargate/ecs"
+	"github.com/turnerlabs/fargate/console"
+	ECS "github.com/turnerlabs/fargate/ecs"
 	"github.com/spf13/cobra"
 )
 
@@ -30,10 +30,9 @@ var serviceEnvSetCmd = &cobra.Command{
 
 At least one environment variable must be specified via the --env flag. Specify
 --env with a key=value parameter multiple times to add multiple variables.`,
-	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceEnvSetOperation{
-			ServiceName: args[0],
+			ServiceName: getServiceName(),
 		}
 
 		operation.SetEnvVars(flagServiceEnvSetEnvVars)
@@ -49,7 +48,7 @@ func init() {
 }
 
 func serviceEnvSet(operation *ServiceEnvSetOperation) {
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 	service := ecs.DescribeService(operation.ServiceName)
 	taskDefinitionArn := ecs.AddEnvVarsToTaskDefinition(service.TaskDefinitionArn, operation.EnvVars)
 

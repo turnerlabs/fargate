@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/jpignata/fargate/cmd"
+	"github.com/turnerlabs/fargate/cmd"
 )
 
+var version string
+
 func main() {
-	cmd.Execute()
+	cmd.Execute(version)
 }

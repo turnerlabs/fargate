@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	awsecs "github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/jpignata/fargate/console"
+	"github.com/turnerlabs/fargate/console"
 )
 
 type CreateServiceInput struct {
@@ -254,7 +254,7 @@ func (ecs *ECS) DescribeServices(serviceArns []string) []Service {
 				PendingCount: aws.Int64Value(d.PendingCount),
 				RunningCount: aws.Int64Value(d.RunningCount),
 				CreatedAt:    aws.TimeValue(d.CreatedAt),
-				Id:           ecs.getDeploymentId(aws.StringValue(d.TaskDefinition)),
+				Id:           ecs.GetDeploymentId(aws.StringValue(d.TaskDefinition)),
 			}
 
 			deploymentTaskDefinition := ecs.DescribeTaskDefinition(aws.StringValue(d.TaskDefinition))

@@ -15,7 +15,7 @@ var (
 )
 
 var serviceLogsCmd = &cobra.Command{
-	Use:   "logs <service-name>",
+	Use:   "logs",
 	Short: "Show logs from tasks in a service",
 	Long: `Show logs from tasks in a service
 
@@ -42,15 +42,14 @@ timestamp:
 You can filter logs for specific term by passing a filter expression via the
 --filter flag. Pass a single term to search for that term, pass multiple terms
 to search for log messages that include all terms.`,
-	Args: cobra.ExactArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &GetLogsOperation{
-			LogGroupName: fmt.Sprintf(serviceLogGroupFormat, args[0]),
+			LogGroupName: fmt.Sprintf(serviceLogGroupFormat, getServiceName()),
 			Filter:       flagServiceLogsFilter,
 			Follow:       flagServiceLogsFollow,
-			Namespace:    args[0],
+			Namespace:    getServiceName(),
 		}
 
 		operation.AddTasks(flagServiceLogsTasks)

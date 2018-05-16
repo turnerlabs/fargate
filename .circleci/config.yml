@@ -2,15 +2,34 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.10
-    working_directory: /go/src/github.com/jpignata/fargate
+      - image: quay.io/turner/fargate-cli-build
+    working_directory: /go/src/github.com/turnerlabs/fargate
     steps:
       - checkout
-
-      - run: git config --global user.email circleci@pignata.com
-      - run: git config --global user.name CircleCI
-
-      - run: go get -u github.com/golang/dep/cmd/dep
-      - run: dep ensure
-
-      - run: make test
+      - run: 
+          name: prep for tests
+          command: |
+            git config --global user.email circleci@turnerlabs.io
+            git config --global user.name CircleCI
+            dep ensure -v
+      - run: 
+          name: run tests
+          command: make test
+      - run:
+          name: multi-platform build (for develop and master)
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "develop" ]; then
+              make dist
+            fi
+      - run:
+          name: deploy develop to github pre-release
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "develop" ]; then
+              make prerelease
+            fi
+      - run:
+          name: deploy master to github release
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              make release
+            fi

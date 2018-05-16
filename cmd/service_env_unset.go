@@ -3,9 +3,9 @@ package cmd
 import (
 	"strings"
 
-	"github.com/jpignata/fargate/console"
-	ECS "github.com/jpignata/fargate/ecs"
 	"github.com/spf13/cobra"
+	"github.com/turnerlabs/fargate/console"
+	ECS "github.com/turnerlabs/fargate/ecs"
 )
 
 type ServiceEnvUnsetOperation struct {
@@ -30,10 +30,9 @@ var serviceEnvUnsetCmd = &cobra.Command{
 
 Unsets the environment variable specified via the --key flag. Specify --key with
 a key name multiple times to unset multiple variables.`,
-	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceEnvUnsetOperation{
-			ServiceName: args[0],
+			ServiceName: getServiceName(),
 		}
 
 		operation.SetKeys(flagServiceEnvUnsetKeys)
@@ -51,7 +50,7 @@ func init() {
 }
 
 func serviceEnvUnset(operation *ServiceEnvUnsetOperation) {
-	ecs := ECS.New(sess, clusterName)
+	ecs := ECS.New(sess, getClusterName())
 	service := ecs.DescribeService(operation.ServiceName)
 	taskDefinitionArn := ecs.RemoveEnvVarsFromTaskDefinition(service.TaskDefinitionArn, operation.Keys)
 
