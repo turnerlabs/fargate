@@ -1,4 +1,4 @@
-## 0.3.0 (Unreleased)
+## 0.3.0 (2018-05-16)
 
 ### Enhancements
 
@@ -7,14 +7,15 @@
   with --no-emoji if you're not into fun
 - Requests and responses from AWS are displayed in full when --verbose is
   passed
+- adds CI/CD pipeline ([#1](https://github.com/turnerlabs/fargate/issues/1))
+- updates to turnerlabs and removes unnecessary cmds ([#2](https://github.com/turnerlabs/fargate/issues/2))
+- Support more flexible options for configuration (cluster and service) ([#4](https://github.com/turnerlabs/fargate/issues/4))
+- Ability to deploy a docker-compose.yml to fargate ([#3](https://github.com/turnerlabs/fargate/issues/3))
 
 ### Bug Fixes
 
 - Environment variable service commands now return a polite error message when
-  invoked without the service name. ([#22][issue-22])
-- Certificate import command re-implemented to work correctly. Previously calls
-  to this command always returned "private key not supported" as we were
-  incorrectly encoding it to base64 before passing it to the AWS SDK.
+  invoked without the service name. ([#22](https://github.com/jpignata/fargate/issues/22)
 
 ### Chores
 
