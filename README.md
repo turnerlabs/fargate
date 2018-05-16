@@ -5,6 +5,11 @@ Deploy serverless containers to the cloud from your command line
 [![CircleCI](https://circleci.com/gh/turnerlabs/fargate/tree/master.svg?style=svg)](https://circleci.com/gh/turnerlabs/fargate/tree/master)
 [![GoDoc](https://godoc.org/github.com/turnerlabs/fargate?status.svg)](https://godoc.org/github.com/turnerlabs/fargate)
 
+![fargate](fargate.png "fargate")
+
+*fargate* is a command-line interface to deploy containers to [AWS Fargate](https://aws.amazon.com/fargate/). Using *fargate*, developers can easily operate fargate services including things like: deploying applications (images and environment variables), monitoring deployments, viewing container logs, restarting and scaling.
+
+
 ## Usage
 
 ### Configuration
@@ -116,7 +121,7 @@ fargate service deploy [--file docker-compose.yml]
 
 Deploy image and environment variables defined in a [docker compose file](https://docs.docker.com/compose/overview/) to service
 
-Deploy a docker [image](https://docs.docker.com/compose/compose-file/#image) and [environment variables](https://docs.docker.com/compose/environment-variables/) defined in a docker compose file together as a single unit.  Note that while the docker-compose yaml configuration supports numerous options, only the image and environment variables are deployed to fargate. If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy. For example:
+Deploy a docker [image](https://docs.docker.com/compose/compose-file/#image) and [environment variables](https://docs.docker.com/compose/environment-variables/) defined in a docker compose file together as a single unit. This allows you to run `docker-compose up` locally to run your app the same way it will run in AWS. Note that while the docker-compose yaml configuration supports numerous options, only the image and environment variables are deployed to fargate. If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy. For example:
 
 ```yaml
 version: '3'
