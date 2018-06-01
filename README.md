@@ -9,6 +9,13 @@ Deploy serverless containers to the cloud from your command line
 
 *fargate* is a command-line interface to deploy containers to [AWS Fargate](https://aws.amazon.com/fargate/). Using *fargate*, developers can easily operate fargate services including things like: deploying applications (images and environment variables), monitoring deployments, viewing container logs, restarting and scaling.
 
+## Install
+
+You can install the CLI with a curl utility script or by downloading the binary from the releases page. Once installed you'll get the `fargate` command.
+
+```
+curl -s get-fargate.turnerlabs.io | sh
+```
 
 ## Usage
 
