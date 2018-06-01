@@ -1,3 +1,7 @@
+## 0.3.1 (2018-06-01)
+
+- Add install link to README
+
 ## 0.3.0 (2018-05-16)
 
 ### Enhancements
