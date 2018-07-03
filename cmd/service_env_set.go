@@ -1,10 +1,9 @@
 package cmd
 
 import (
-	"fmt"
+	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
 	ECS "github.com/turnerlabs/fargate/ecs"
-	"github.com/spf13/cobra"
 )
 
 type ServiceEnvSetOperation struct {
