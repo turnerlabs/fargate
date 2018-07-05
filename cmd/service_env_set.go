@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
 	ECS "github.com/turnerlabs/fargate/ecs"
-	"github.com/spf13/cobra"
 )
 
 type ServiceEnvSetOperation struct {
@@ -42,7 +42,7 @@ At least one environment variable must be specified via the --env flag. Specify
 }
 
 func init() {
-	serviceEnvSetCmd.Flags().StringSliceVarP(&flagServiceEnvSetEnvVars, "env", "e", []string{}, "Environment variables to set [e.g. KEY=value]")
+	serviceEnvSetCmd.Flags().StringArrayVarP(&flagServiceEnvSetEnvVars, "env", "e", []string{}, "Environment variables to set [e.g. KEY=value]")
 
 	serviceEnvCmd.AddCommand(serviceEnvSetCmd)
 }

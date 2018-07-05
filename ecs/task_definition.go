@@ -223,18 +223,28 @@ func (ecs *ECS) AddEnvVarsToTaskDefinition(taskDefinitionArn string, envVars []E
 	return aws.StringValue(resp.TaskDefinition.TaskDefinitionArn)
 }
 
+//RemoveEnvVarsFromTaskDefinition registers a new task definition with the specified keys removed
 func (ecs *ECS) RemoveEnvVarsFromTaskDefinition(taskDefinitionArn string, keys []string) string {
 	var newEnvironment []*awsecs.KeyValuePair
 
+	//look up task definition
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
 	environment := taskDefinition.ContainerDefinitions[0].Environment
 
+	//iterate existing envvars
 	for _, keyValuePair := range environment {
+
+		//is this key a match to remove?
+		match := false
 		for _, key := range keys {
 			if aws.StringValue(keyValuePair.Name) == key {
-				continue
+				match = true
+				break
 			}
+		}
 
+		//add this envvar since it wasn't a match to remove
+		if !match {
 			newEnvironment = append(newEnvironment, keyValuePair)
 		}
 	}

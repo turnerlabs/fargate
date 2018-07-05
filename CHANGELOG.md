@@ -1,3 +1,12 @@
+## 0.3.2 (2018-07-05)
+
+### Bug Fixes
+
+- Unset multiple environment variables at once ([#12](https://github.com/turnerlabs/fargate/issues/12))
+
+- Can't add environment variable that contains a comma ([#14](https://github.com/turnerlabs/fargate/issues/14))
+
+
 ## 0.3.1 (2018-06-01)
 
 - Add install link to README
