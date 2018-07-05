@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"bufio"
 	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
 	ECS "github.com/turnerlabs/fargate/ecs"
+	"os"
 )
 
 type ServiceEnvSetOperation struct {
@@ -17,14 +19,26 @@ func (o *ServiceEnvSetOperation) Validate() {
 	}
 }
 
-func (o *ServiceEnvSetOperation) SetEnvVars(inputEnvVars []string) {
+func (o *ServiceEnvSetOperation) SetEnvVars(inputEnvVars []string, envVarFile string) {
+	if envVarFile != "" {
+		file, err := os.Open(envVarFile)
+		if err != nil {
+			return
+		}
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			inputEnvVars = append(inputEnvVars, scanner.Text())
+		}
+	}
 	o.EnvVars = extractEnvVars(inputEnvVars)
 }
 
 var flagServiceEnvSetEnvVars []string
+var flagServiceEnvSetEnvFile string
 
 var serviceEnvSetCmd = &cobra.Command{
-	Use:   "set --env <key=value> [--env <key=value] ...",
+	Use:   "set --env <key=value> [--env <key=value] [--file filename] ...",
 	Short: "Set environment variables",
 	Long: `Set environment variables
 
@@ -35,7 +49,7 @@ At least one environment variable must be specified via the --env flag. Specify
 			ServiceName: getServiceName(),
 		}
 
-		operation.SetEnvVars(flagServiceEnvSetEnvVars)
+		operation.SetEnvVars(flagServiceEnvSetEnvVars, flagServiceEnvSetEnvFile)
 		operation.Validate()
 		serviceEnvSet(operation)
 	},
@@ -43,6 +57,7 @@ At least one environment variable must be specified via the --env flag. Specify
 
 func init() {
 	serviceEnvSetCmd.Flags().StringArrayVarP(&flagServiceEnvSetEnvVars, "env", "e", []string{}, "Environment variables to set [e.g. KEY=value]")
+	serviceEnvSetCmd.Flags().StringVarP(&flagServiceEnvSetEnvFile, "file", "f", "", "File containing list of environment variables to set, one per line, of the form KEY=value")
 
 	serviceEnvCmd.AddCommand(serviceEnvSetCmd)
 }
