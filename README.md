@@ -221,7 +221,7 @@ specified with a sign such as +5 or -2.
 ##### fargate service env set
 
 ```console
-fargate service env set [--env <key=value>] [--file <pathname>
+fargate service env set [--env <key=value>] [--file <pathname>]
 ```
 
 Set environment variables
