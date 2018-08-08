@@ -233,7 +233,9 @@ file, one per line, and specify the filename with --file.
 
 Each --env parameter string or line in the file must be of the form
 "key=value", with no quotation marks and no whitespace around the "=" unless you want
-literal leading whitespace in the value.
+literal leading whitespace in the value.  Additionally, the "key" side must be
+a legal shell identifier, which means it must start with an ASCII letter A-Z or
+underscore and consist of only letters, digits, and underscores.
 
 ##### fargate service env unset
 
