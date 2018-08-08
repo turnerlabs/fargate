@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	ECS "github.com/turnerlabs/fargate/ecs"
+	"github.com/spf13/cobra"
 )
 
 type ServiceEnvListOperation struct {

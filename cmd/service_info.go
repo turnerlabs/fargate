@@ -7,12 +7,12 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/spf13/cobra"
 	ACM "github.com/turnerlabs/fargate/acm"
 	"github.com/turnerlabs/fargate/console"
 	EC2 "github.com/turnerlabs/fargate/ec2"
 	ECS "github.com/turnerlabs/fargate/ecs"
 	ELBV2 "github.com/turnerlabs/fargate/elbv2"
+	"github.com/spf13/cobra"
 )
 
 const statusActive = "ACTIVE"

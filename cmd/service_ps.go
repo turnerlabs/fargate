@@ -5,10 +5,10 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
 	EC2 "github.com/turnerlabs/fargate/ec2"
 	ECS "github.com/turnerlabs/fargate/ecs"
+	"github.com/spf13/cobra"
 )
 
 type ServiceProcessListOperation struct {
