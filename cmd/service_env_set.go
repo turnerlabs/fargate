@@ -45,9 +45,13 @@ var serviceEnvSetCmd = &cobra.Command{
 At least one environment variable must be specified via either the --env or
 --file flags. You may specify any number of variables on the command line by
 repeating --env before each one, or else place multiple variables in a file, one
-per line, and specify the filename with --file.  Each --env parameter string or line in the file must be of the form
+per line, and specify the filename with --file.
+
+Each --env parameter string or line in the file must be of the form
 "key=value", with no quotation marks and no whitespace around the "=" unless you want
-literal leading whitespace in the value.`,
+literal leading whitespace in the value.  Additionally, the "key" side must be
+a legal shell identifier, which means it must start with an ASCII letter A-Z or
+underscore and consist of only letters, digits, and underscores.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceEnvSetOperation{
 			ServiceName: getServiceName(),
