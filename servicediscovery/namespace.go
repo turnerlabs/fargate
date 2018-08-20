@@ -22,7 +22,7 @@ func (sd *ServiceDiscovery) GetNamespace(namespaceId string) Namespace {
 	)
 
 	if err != nil {
-		console.ErrorExit(err, "Could no describe ServiceDiscovery namespace")
+		console.ErrorExit(err, "Could not describe ServiceDiscovery namespace")
 	}
 
 	namespace = Namespace{
