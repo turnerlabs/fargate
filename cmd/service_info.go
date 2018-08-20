@@ -13,6 +13,7 @@ import (
 	ECS "github.com/turnerlabs/fargate/ecs"
 	ELBV2 "github.com/turnerlabs/fargate/elbv2"
 	"github.com/spf13/cobra"
+	SD "github.com/turnerlabs/fargate/servicediscovery"
 )
 
 const statusActive = "ACTIVE"
@@ -52,6 +53,7 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 	ecs := ECS.New(sess, getClusterName())
 	ec2 := EC2.New(sess)
 	elbv2 := ELBV2.New(sess)
+	sd := SD.New(sess)
 	service := ecs.DescribeService(operation.ServiceName)
 	tasks := ecs.DescribeTasksForService(operation.ServiceName)
 
@@ -116,6 +118,43 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 
 			for _, envVar := range service.EnvVars {
 				fmt.Printf("   %s=%s\n", envVar.Key, envVar.Value)
+			}
+		}
+	}
+
+	if len(service.ServiceRegistries) > 0 {
+		console.KeyValue("Service Discovery", "\n")
+
+		for _, reg := range service.ServiceRegistries {
+			var ns strings.Builder
+
+			srv := sd.GetService(reg.RegistryArn)
+
+			ns.WriteString(srv.Namespace.Name)
+
+			if srv.Namespace.Private {
+				ns.WriteString(" (PRIVATE)")
+			}
+
+			console.KeyValue("  "+srv.Id, "\n")
+			console.KeyValue("    Endpoint", "%s\n", srv.Name+"."+srv.Namespace.Name)
+			console.KeyValue("    Name", "%s\n", srv.Name)
+			console.KeyValue("    Namespace", "%s\n", ns.String())
+
+			if len(srv.DnsRecords) > 0 {
+				console.KeyValue("    DNS Records", "\n")
+
+				for _, record := range srv.DnsRecords {
+					switch record.Type {
+					case "SRV":
+						console.KeyValue("      Type", "%s\t", record.Type)
+						console.KeyValue("TTL", "%d\t", record.TTL)
+						console.KeyValue("Port", "%d\n", reg.Port)
+					default:
+						console.KeyValue("      Type", "%s\t", record.Type)
+						console.KeyValue("TTL", "%d\n", record.TTL)
+					}
+				}
 			}
 		}
 	}
