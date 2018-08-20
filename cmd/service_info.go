@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 
@@ -123,12 +124,15 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 	}
 
 	if len(service.ServiceRegistries) > 0 {
-		console.KeyValue("Service Discovery", "\n")
+		console.Header("Service Discovery")
+
+		w := new(tabwriter.Writer)
+		w.Init(os.Stdout, 0, 8, 1, '\t', 0)
+		fmt.Fprintln(w, "ENDPOINT\tNAMESPACE\tTYPE\tPORT\tTTL\t")
 
 		for _, reg := range service.ServiceRegistries {
-			var ns strings.Builder
-
 			srv := sd.GetService(reg.RegistryArn)
+			ns := new(strings.Builder)
 
 			ns.WriteString(srv.Namespace.Name)
 
@@ -136,27 +140,24 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 				ns.WriteString(" (PRIVATE)")
 			}
 
-			console.KeyValue("  "+srv.Id, "\n")
-			console.KeyValue("    Endpoint", "%s\n", srv.Name+"."+srv.Namespace.Name)
-			console.KeyValue("    Name", "%s\n", srv.Name)
-			console.KeyValue("    Namespace", "%s\n", ns.String())
+			for _, record := range srv.DnsRecords {
+				port := ""
 
-			if len(srv.DnsRecords) > 0 {
-				console.KeyValue("    DNS Records", "\n")
-
-				for _, record := range srv.DnsRecords {
-					switch record.Type {
-					case "SRV":
-						console.KeyValue("      Type", "%s\t", record.Type)
-						console.KeyValue("TTL", "%d\t", record.TTL)
-						console.KeyValue("Port", "%d\n", reg.Port)
-					default:
-						console.KeyValue("      Type", "%s\t", record.Type)
-						console.KeyValue("TTL", "%d\n", record.TTL)
-					}
+				if record.Type == "SRV" && reg.Port != 0 {
+					port = strconv.FormatInt(reg.Port, 10)
 				}
+
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%d\n",
+					srv.Name+"."+srv.Namespace.Name+" ",
+					ns.String(),
+					record.Type,
+					port,
+					record.TTL,
+				)
 			}
 		}
+
+		w.Flush()
 	}
 
 	if len(tasks) > 0 {
