@@ -128,7 +128,7 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 8, 1, '\t', 0)
-		fmt.Fprintln(w, "ENDPOINT\tNAMESPACE\tTYPE\tPORT\tTTL\t")
+		fmt.Fprintln(w, "ID\tENDPOINT\tNAMESPACE\tTYPE\tPORT\tTTL\t")
 
 		for _, reg := range service.ServiceRegistries {
 			srv := sd.GetService(reg.RegistryArn)
@@ -147,7 +147,8 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 					port = strconv.FormatInt(reg.Port, 10)
 				}
 
-				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%d\n",
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%d\n",
+					srv.Id,
 					srv.Name+"."+srv.Namespace.Name+" ",
 					ns.String(),
 					record.Type,
