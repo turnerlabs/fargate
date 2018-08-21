@@ -1663,6 +1663,50 @@ func (mr *MockEC2APIMockRecorder) CreateEgressOnlyInternetGatewayRequest(arg0 in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEgressOnlyInternetGatewayRequest", reflect.TypeOf((*MockEC2API)(nil).CreateEgressOnlyInternetGatewayRequest), arg0)
 }
 
+// CreateFleet mocks base method
+func (m *MockEC2API) CreateFleet(arg0 *ec2.CreateFleetInput) (*ec2.CreateFleetOutput, error) {
+	ret := m.ctrl.Call(m, "CreateFleet", arg0)
+	ret0, _ := ret[0].(*ec2.CreateFleetOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateFleet indicates an expected call of CreateFleet
+func (mr *MockEC2APIMockRecorder) CreateFleet(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFleet", reflect.TypeOf((*MockEC2API)(nil).CreateFleet), arg0)
+}
+
+// CreateFleetWithContext mocks base method
+func (m *MockEC2API) CreateFleetWithContext(arg0 aws.Context, arg1 *ec2.CreateFleetInput, arg2 ...request.Option) (*ec2.CreateFleetOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateFleetWithContext", varargs...)
+	ret0, _ := ret[0].(*ec2.CreateFleetOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateFleetWithContext indicates an expected call of CreateFleetWithContext
+func (mr *MockEC2APIMockRecorder) CreateFleetWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFleetWithContext", reflect.TypeOf((*MockEC2API)(nil).CreateFleetWithContext), varargs...)
+}
+
+// CreateFleetRequest mocks base method
+func (m *MockEC2API) CreateFleetRequest(arg0 *ec2.CreateFleetInput) (*request.Request, *ec2.CreateFleetOutput) {
+	ret := m.ctrl.Call(m, "CreateFleetRequest", arg0)
+	ret0, _ := ret[0].(*request.Request)
+	ret1, _ := ret[1].(*ec2.CreateFleetOutput)
+	return ret0, ret1
+}
+
+// CreateFleetRequest indicates an expected call of CreateFleetRequest
+func (mr *MockEC2APIMockRecorder) CreateFleetRequest(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFleetRequest", reflect.TypeOf((*MockEC2API)(nil).CreateFleetRequest), arg0)
+}
+
 // CreateFlowLogs mocks base method
 func (m *MockEC2API) CreateFlowLogs(arg0 *ec2.CreateFlowLogsInput) (*ec2.CreateFlowLogsOutput, error) {
 	ret := m.ctrl.Call(m, "CreateFlowLogs", arg0)
@@ -3159,6 +3203,50 @@ func (mr *MockEC2APIMockRecorder) DeleteEgressOnlyInternetGatewayRequest(arg0 in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteEgressOnlyInternetGatewayRequest", reflect.TypeOf((*MockEC2API)(nil).DeleteEgressOnlyInternetGatewayRequest), arg0)
 }
 
+// DeleteFleets mocks base method
+func (m *MockEC2API) DeleteFleets(arg0 *ec2.DeleteFleetsInput) (*ec2.DeleteFleetsOutput, error) {
+	ret := m.ctrl.Call(m, "DeleteFleets", arg0)
+	ret0, _ := ret[0].(*ec2.DeleteFleetsOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteFleets indicates an expected call of DeleteFleets
+func (mr *MockEC2APIMockRecorder) DeleteFleets(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFleets", reflect.TypeOf((*MockEC2API)(nil).DeleteFleets), arg0)
+}
+
+// DeleteFleetsWithContext mocks base method
+func (m *MockEC2API) DeleteFleetsWithContext(arg0 aws.Context, arg1 *ec2.DeleteFleetsInput, arg2 ...request.Option) (*ec2.DeleteFleetsOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteFleetsWithContext", varargs...)
+	ret0, _ := ret[0].(*ec2.DeleteFleetsOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteFleetsWithContext indicates an expected call of DeleteFleetsWithContext
+func (mr *MockEC2APIMockRecorder) DeleteFleetsWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFleetsWithContext", reflect.TypeOf((*MockEC2API)(nil).DeleteFleetsWithContext), varargs...)
+}
+
+// DeleteFleetsRequest mocks base method
+func (m *MockEC2API) DeleteFleetsRequest(arg0 *ec2.DeleteFleetsInput) (*request.Request, *ec2.DeleteFleetsOutput) {
+	ret := m.ctrl.Call(m, "DeleteFleetsRequest", arg0)
+	ret0, _ := ret[0].(*request.Request)
+	ret1, _ := ret[1].(*ec2.DeleteFleetsOutput)
+	return ret0, ret1
+}
+
+// DeleteFleetsRequest indicates an expected call of DeleteFleetsRequest
+func (mr *MockEC2APIMockRecorder) DeleteFleetsRequest(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFleetsRequest", reflect.TypeOf((*MockEC2API)(nil).DeleteFleetsRequest), arg0)
+}
+
 // DeleteFlowLogs mocks base method
 func (m *MockEC2API) DeleteFlowLogs(arg0 *ec2.DeleteFlowLogsInput) (*ec2.DeleteFlowLogsOutput, error) {
 	ret := m.ctrl.Call(m, "DeleteFlowLogs", arg0)
@@ -4523,6 +4611,50 @@ func (mr *MockEC2APIMockRecorder) DescribeAddressesRequest(arg0 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeAddressesRequest", reflect.TypeOf((*MockEC2API)(nil).DescribeAddressesRequest), arg0)
 }
 
+// DescribeAggregateIdFormat mocks base method
+func (m *MockEC2API) DescribeAggregateIdFormat(arg0 *ec2.DescribeAggregateIdFormatInput) (*ec2.DescribeAggregateIdFormatOutput, error) {
+	ret := m.ctrl.Call(m, "DescribeAggregateIdFormat", arg0)
+	ret0, _ := ret[0].(*ec2.DescribeAggregateIdFormatOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DescribeAggregateIdFormat indicates an expected call of DescribeAggregateIdFormat
+func (mr *MockEC2APIMockRecorder) DescribeAggregateIdFormat(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeAggregateIdFormat", reflect.TypeOf((*MockEC2API)(nil).DescribeAggregateIdFormat), arg0)
+}
+
+// DescribeAggregateIdFormatWithContext mocks base method
+func (m *MockEC2API) DescribeAggregateIdFormatWithContext(arg0 aws.Context, arg1 *ec2.DescribeAggregateIdFormatInput, arg2 ...request.Option) (*ec2.DescribeAggregateIdFormatOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DescribeAggregateIdFormatWithContext", varargs...)
+	ret0, _ := ret[0].(*ec2.DescribeAggregateIdFormatOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DescribeAggregateIdFormatWithContext indicates an expected call of DescribeAggregateIdFormatWithContext
+func (mr *MockEC2APIMockRecorder) DescribeAggregateIdFormatWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeAggregateIdFormatWithContext", reflect.TypeOf((*MockEC2API)(nil).DescribeAggregateIdFormatWithContext), varargs...)
+}
+
+// DescribeAggregateIdFormatRequest mocks base method
+func (m *MockEC2API) DescribeAggregateIdFormatRequest(arg0 *ec2.DescribeAggregateIdFormatInput) (*request.Request, *ec2.DescribeAggregateIdFormatOutput) {
+	ret := m.ctrl.Call(m, "DescribeAggregateIdFormatRequest", arg0)
+	ret0, _ := ret[0].(*request.Request)
+	ret1, _ := ret[1].(*ec2.DescribeAggregateIdFormatOutput)
+	return ret0, ret1
+}
+
+// DescribeAggregateIdFormatRequest indicates an expected call of DescribeAggregateIdFormatRequest
+func (mr *MockEC2APIMockRecorder) DescribeAggregateIdFormatRequest(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeAggregateIdFormatRequest", reflect.TypeOf((*MockEC2API)(nil).DescribeAggregateIdFormatRequest), arg0)
+}
+
 // DescribeAvailabilityZones mocks base method
 func (m *MockEC2API) DescribeAvailabilityZones(arg0 *ec2.DescribeAvailabilityZonesInput) (*ec2.DescribeAvailabilityZonesOutput, error) {
 	ret := m.ctrl.Call(m, "DescribeAvailabilityZones", arg0)
@@ -4917,6 +5049,138 @@ func (m *MockEC2API) DescribeExportTasksRequest(arg0 *ec2.DescribeExportTasksInp
 // DescribeExportTasksRequest indicates an expected call of DescribeExportTasksRequest
 func (mr *MockEC2APIMockRecorder) DescribeExportTasksRequest(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeExportTasksRequest", reflect.TypeOf((*MockEC2API)(nil).DescribeExportTasksRequest), arg0)
+}
+
+// DescribeFleetHistory mocks base method
+func (m *MockEC2API) DescribeFleetHistory(arg0 *ec2.DescribeFleetHistoryInput) (*ec2.DescribeFleetHistoryOutput, error) {
+	ret := m.ctrl.Call(m, "DescribeFleetHistory", arg0)
+	ret0, _ := ret[0].(*ec2.DescribeFleetHistoryOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DescribeFleetHistory indicates an expected call of DescribeFleetHistory
+func (mr *MockEC2APIMockRecorder) DescribeFleetHistory(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeFleetHistory", reflect.TypeOf((*MockEC2API)(nil).DescribeFleetHistory), arg0)
+}
+
+// DescribeFleetHistoryWithContext mocks base method
+func (m *MockEC2API) DescribeFleetHistoryWithContext(arg0 aws.Context, arg1 *ec2.DescribeFleetHistoryInput, arg2 ...request.Option) (*ec2.DescribeFleetHistoryOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DescribeFleetHistoryWithContext", varargs...)
+	ret0, _ := ret[0].(*ec2.DescribeFleetHistoryOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DescribeFleetHistoryWithContext indicates an expected call of DescribeFleetHistoryWithContext
+func (mr *MockEC2APIMockRecorder) DescribeFleetHistoryWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeFleetHistoryWithContext", reflect.TypeOf((*MockEC2API)(nil).DescribeFleetHistoryWithContext), varargs...)
+}
+
+// DescribeFleetHistoryRequest mocks base method
+func (m *MockEC2API) DescribeFleetHistoryRequest(arg0 *ec2.DescribeFleetHistoryInput) (*request.Request, *ec2.DescribeFleetHistoryOutput) {
+	ret := m.ctrl.Call(m, "DescribeFleetHistoryRequest", arg0)
+	ret0, _ := ret[0].(*request.Request)
+	ret1, _ := ret[1].(*ec2.DescribeFleetHistoryOutput)
+	return ret0, ret1
+}
+
+// DescribeFleetHistoryRequest indicates an expected call of DescribeFleetHistoryRequest
+func (mr *MockEC2APIMockRecorder) DescribeFleetHistoryRequest(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeFleetHistoryRequest", reflect.TypeOf((*MockEC2API)(nil).DescribeFleetHistoryRequest), arg0)
+}
+
+// DescribeFleetInstances mocks base method
+func (m *MockEC2API) DescribeFleetInstances(arg0 *ec2.DescribeFleetInstancesInput) (*ec2.DescribeFleetInstancesOutput, error) {
+	ret := m.ctrl.Call(m, "DescribeFleetInstances", arg0)
+	ret0, _ := ret[0].(*ec2.DescribeFleetInstancesOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DescribeFleetInstances indicates an expected call of DescribeFleetInstances
+func (mr *MockEC2APIMockRecorder) DescribeFleetInstances(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeFleetInstances", reflect.TypeOf((*MockEC2API)(nil).DescribeFleetInstances), arg0)
+}
+
+// DescribeFleetInstancesWithContext mocks base method
+func (m *MockEC2API) DescribeFleetInstancesWithContext(arg0 aws.Context, arg1 *ec2.DescribeFleetInstancesInput, arg2 ...request.Option) (*ec2.DescribeFleetInstancesOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DescribeFleetInstancesWithContext", varargs...)
+	ret0, _ := ret[0].(*ec2.DescribeFleetInstancesOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DescribeFleetInstancesWithContext indicates an expected call of DescribeFleetInstancesWithContext
+func (mr *MockEC2APIMockRecorder) DescribeFleetInstancesWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeFleetInstancesWithContext", reflect.TypeOf((*MockEC2API)(nil).DescribeFleetInstancesWithContext), varargs...)
+}
+
+// DescribeFleetInstancesRequest mocks base method
+func (m *MockEC2API) DescribeFleetInstancesRequest(arg0 *ec2.DescribeFleetInstancesInput) (*request.Request, *ec2.DescribeFleetInstancesOutput) {
+	ret := m.ctrl.Call(m, "DescribeFleetInstancesRequest", arg0)
+	ret0, _ := ret[0].(*request.Request)
+	ret1, _ := ret[1].(*ec2.DescribeFleetInstancesOutput)
+	return ret0, ret1
+}
+
+// DescribeFleetInstancesRequest indicates an expected call of DescribeFleetInstancesRequest
+func (mr *MockEC2APIMockRecorder) DescribeFleetInstancesRequest(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeFleetInstancesRequest", reflect.TypeOf((*MockEC2API)(nil).DescribeFleetInstancesRequest), arg0)
+}
+
+// DescribeFleets mocks base method
+func (m *MockEC2API) DescribeFleets(arg0 *ec2.DescribeFleetsInput) (*ec2.DescribeFleetsOutput, error) {
+	ret := m.ctrl.Call(m, "DescribeFleets", arg0)
+	ret0, _ := ret[0].(*ec2.DescribeFleetsOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DescribeFleets indicates an expected call of DescribeFleets
+func (mr *MockEC2APIMockRecorder) DescribeFleets(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeFleets", reflect.TypeOf((*MockEC2API)(nil).DescribeFleets), arg0)
+}
+
+// DescribeFleetsWithContext mocks base method
+func (m *MockEC2API) DescribeFleetsWithContext(arg0 aws.Context, arg1 *ec2.DescribeFleetsInput, arg2 ...request.Option) (*ec2.DescribeFleetsOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DescribeFleetsWithContext", varargs...)
+	ret0, _ := ret[0].(*ec2.DescribeFleetsOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DescribeFleetsWithContext indicates an expected call of DescribeFleetsWithContext
+func (mr *MockEC2APIMockRecorder) DescribeFleetsWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeFleetsWithContext", reflect.TypeOf((*MockEC2API)(nil).DescribeFleetsWithContext), varargs...)
+}
+
+// DescribeFleetsRequest mocks base method
+func (m *MockEC2API) DescribeFleetsRequest(arg0 *ec2.DescribeFleetsInput) (*request.Request, *ec2.DescribeFleetsOutput) {
+	ret := m.ctrl.Call(m, "DescribeFleetsRequest", arg0)
+	ret0, _ := ret[0].(*request.Request)
+	ret1, _ := ret[1].(*ec2.DescribeFleetsOutput)
+	return ret0, ret1
+}
+
+// DescribeFleetsRequest indicates an expected call of DescribeFleetsRequest
+func (mr *MockEC2APIMockRecorder) DescribeFleetsRequest(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeFleetsRequest", reflect.TypeOf((*MockEC2API)(nil).DescribeFleetsRequest), arg0)
 }
 
 // DescribeFlowLogs mocks base method
@@ -6280,6 +6544,50 @@ func (m *MockEC2API) DescribePrefixListsRequest(arg0 *ec2.DescribePrefixListsInp
 // DescribePrefixListsRequest indicates an expected call of DescribePrefixListsRequest
 func (mr *MockEC2APIMockRecorder) DescribePrefixListsRequest(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribePrefixListsRequest", reflect.TypeOf((*MockEC2API)(nil).DescribePrefixListsRequest), arg0)
+}
+
+// DescribePrincipalIdFormat mocks base method
+func (m *MockEC2API) DescribePrincipalIdFormat(arg0 *ec2.DescribePrincipalIdFormatInput) (*ec2.DescribePrincipalIdFormatOutput, error) {
+	ret := m.ctrl.Call(m, "DescribePrincipalIdFormat", arg0)
+	ret0, _ := ret[0].(*ec2.DescribePrincipalIdFormatOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DescribePrincipalIdFormat indicates an expected call of DescribePrincipalIdFormat
+func (mr *MockEC2APIMockRecorder) DescribePrincipalIdFormat(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribePrincipalIdFormat", reflect.TypeOf((*MockEC2API)(nil).DescribePrincipalIdFormat), arg0)
+}
+
+// DescribePrincipalIdFormatWithContext mocks base method
+func (m *MockEC2API) DescribePrincipalIdFormatWithContext(arg0 aws.Context, arg1 *ec2.DescribePrincipalIdFormatInput, arg2 ...request.Option) (*ec2.DescribePrincipalIdFormatOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DescribePrincipalIdFormatWithContext", varargs...)
+	ret0, _ := ret[0].(*ec2.DescribePrincipalIdFormatOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DescribePrincipalIdFormatWithContext indicates an expected call of DescribePrincipalIdFormatWithContext
+func (mr *MockEC2APIMockRecorder) DescribePrincipalIdFormatWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribePrincipalIdFormatWithContext", reflect.TypeOf((*MockEC2API)(nil).DescribePrincipalIdFormatWithContext), varargs...)
+}
+
+// DescribePrincipalIdFormatRequest mocks base method
+func (m *MockEC2API) DescribePrincipalIdFormatRequest(arg0 *ec2.DescribePrincipalIdFormatInput) (*request.Request, *ec2.DescribePrincipalIdFormatOutput) {
+	ret := m.ctrl.Call(m, "DescribePrincipalIdFormatRequest", arg0)
+	ret0, _ := ret[0].(*request.Request)
+	ret1, _ := ret[1].(*ec2.DescribePrincipalIdFormatOutput)
+	return ret0, ret1
+}
+
+// DescribePrincipalIdFormatRequest indicates an expected call of DescribePrincipalIdFormatRequest
+func (mr *MockEC2APIMockRecorder) DescribePrincipalIdFormatRequest(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribePrincipalIdFormatRequest", reflect.TypeOf((*MockEC2API)(nil).DescribePrincipalIdFormatRequest), arg0)
 }
 
 // DescribeRegions mocks base method
@@ -9416,6 +9724,50 @@ func (m *MockEC2API) ImportVolumeRequest(arg0 *ec2.ImportVolumeInput) (*request.
 // ImportVolumeRequest indicates an expected call of ImportVolumeRequest
 func (mr *MockEC2APIMockRecorder) ImportVolumeRequest(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ImportVolumeRequest", reflect.TypeOf((*MockEC2API)(nil).ImportVolumeRequest), arg0)
+}
+
+// ModifyFleet mocks base method
+func (m *MockEC2API) ModifyFleet(arg0 *ec2.ModifyFleetInput) (*ec2.ModifyFleetOutput, error) {
+	ret := m.ctrl.Call(m, "ModifyFleet", arg0)
+	ret0, _ := ret[0].(*ec2.ModifyFleetOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ModifyFleet indicates an expected call of ModifyFleet
+func (mr *MockEC2APIMockRecorder) ModifyFleet(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ModifyFleet", reflect.TypeOf((*MockEC2API)(nil).ModifyFleet), arg0)
+}
+
+// ModifyFleetWithContext mocks base method
+func (m *MockEC2API) ModifyFleetWithContext(arg0 aws.Context, arg1 *ec2.ModifyFleetInput, arg2 ...request.Option) (*ec2.ModifyFleetOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ModifyFleetWithContext", varargs...)
+	ret0, _ := ret[0].(*ec2.ModifyFleetOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ModifyFleetWithContext indicates an expected call of ModifyFleetWithContext
+func (mr *MockEC2APIMockRecorder) ModifyFleetWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ModifyFleetWithContext", reflect.TypeOf((*MockEC2API)(nil).ModifyFleetWithContext), varargs...)
+}
+
+// ModifyFleetRequest mocks base method
+func (m *MockEC2API) ModifyFleetRequest(arg0 *ec2.ModifyFleetInput) (*request.Request, *ec2.ModifyFleetOutput) {
+	ret := m.ctrl.Call(m, "ModifyFleetRequest", arg0)
+	ret0, _ := ret[0].(*request.Request)
+	ret1, _ := ret[1].(*ec2.ModifyFleetOutput)
+	return ret0, ret1
+}
+
+// ModifyFleetRequest indicates an expected call of ModifyFleetRequest
+func (mr *MockEC2APIMockRecorder) ModifyFleetRequest(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ModifyFleetRequest", reflect.TypeOf((*MockEC2API)(nil).ModifyFleetRequest), arg0)
 }
 
 // ModifyFpgaImageAttribute mocks base method

@@ -167,6 +167,50 @@ func (mr *MockACMAPIMockRecorder) DescribeCertificateRequest(arg0 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeCertificateRequest", reflect.TypeOf((*MockACMAPI)(nil).DescribeCertificateRequest), arg0)
 }
 
+// ExportCertificate mocks base method
+func (m *MockACMAPI) ExportCertificate(arg0 *acm.ExportCertificateInput) (*acm.ExportCertificateOutput, error) {
+	ret := m.ctrl.Call(m, "ExportCertificate", arg0)
+	ret0, _ := ret[0].(*acm.ExportCertificateOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExportCertificate indicates an expected call of ExportCertificate
+func (mr *MockACMAPIMockRecorder) ExportCertificate(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExportCertificate", reflect.TypeOf((*MockACMAPI)(nil).ExportCertificate), arg0)
+}
+
+// ExportCertificateWithContext mocks base method
+func (m *MockACMAPI) ExportCertificateWithContext(arg0 aws.Context, arg1 *acm.ExportCertificateInput, arg2 ...request.Option) (*acm.ExportCertificateOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExportCertificateWithContext", varargs...)
+	ret0, _ := ret[0].(*acm.ExportCertificateOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExportCertificateWithContext indicates an expected call of ExportCertificateWithContext
+func (mr *MockACMAPIMockRecorder) ExportCertificateWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExportCertificateWithContext", reflect.TypeOf((*MockACMAPI)(nil).ExportCertificateWithContext), varargs...)
+}
+
+// ExportCertificateRequest mocks base method
+func (m *MockACMAPI) ExportCertificateRequest(arg0 *acm.ExportCertificateInput) (*request.Request, *acm.ExportCertificateOutput) {
+	ret := m.ctrl.Call(m, "ExportCertificateRequest", arg0)
+	ret0, _ := ret[0].(*request.Request)
+	ret1, _ := ret[1].(*acm.ExportCertificateOutput)
+	return ret0, ret1
+}
+
+// ExportCertificateRequest indicates an expected call of ExportCertificateRequest
+func (mr *MockACMAPIMockRecorder) ExportCertificateRequest(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExportCertificateRequest", reflect.TypeOf((*MockACMAPI)(nil).ExportCertificateRequest), arg0)
+}
+
 // GetCertificate mocks base method
 func (m *MockACMAPI) GetCertificate(arg0 *acm.GetCertificateInput) (*acm.GetCertificateOutput, error) {
 	ret := m.ctrl.Call(m, "GetCertificate", arg0)
@@ -502,4 +546,77 @@ func (m *MockACMAPI) ResendValidationEmailRequest(arg0 *acm.ResendValidationEmai
 // ResendValidationEmailRequest indicates an expected call of ResendValidationEmailRequest
 func (mr *MockACMAPIMockRecorder) ResendValidationEmailRequest(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResendValidationEmailRequest", reflect.TypeOf((*MockACMAPI)(nil).ResendValidationEmailRequest), arg0)
+}
+
+// UpdateCertificateOptions mocks base method
+func (m *MockACMAPI) UpdateCertificateOptions(arg0 *acm.UpdateCertificateOptionsInput) (*acm.UpdateCertificateOptionsOutput, error) {
+	ret := m.ctrl.Call(m, "UpdateCertificateOptions", arg0)
+	ret0, _ := ret[0].(*acm.UpdateCertificateOptionsOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateCertificateOptions indicates an expected call of UpdateCertificateOptions
+func (mr *MockACMAPIMockRecorder) UpdateCertificateOptions(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCertificateOptions", reflect.TypeOf((*MockACMAPI)(nil).UpdateCertificateOptions), arg0)
+}
+
+// UpdateCertificateOptionsWithContext mocks base method
+func (m *MockACMAPI) UpdateCertificateOptionsWithContext(arg0 aws.Context, arg1 *acm.UpdateCertificateOptionsInput, arg2 ...request.Option) (*acm.UpdateCertificateOptionsOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateCertificateOptionsWithContext", varargs...)
+	ret0, _ := ret[0].(*acm.UpdateCertificateOptionsOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateCertificateOptionsWithContext indicates an expected call of UpdateCertificateOptionsWithContext
+func (mr *MockACMAPIMockRecorder) UpdateCertificateOptionsWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCertificateOptionsWithContext", reflect.TypeOf((*MockACMAPI)(nil).UpdateCertificateOptionsWithContext), varargs...)
+}
+
+// UpdateCertificateOptionsRequest mocks base method
+func (m *MockACMAPI) UpdateCertificateOptionsRequest(arg0 *acm.UpdateCertificateOptionsInput) (*request.Request, *acm.UpdateCertificateOptionsOutput) {
+	ret := m.ctrl.Call(m, "UpdateCertificateOptionsRequest", arg0)
+	ret0, _ := ret[0].(*request.Request)
+	ret1, _ := ret[1].(*acm.UpdateCertificateOptionsOutput)
+	return ret0, ret1
+}
+
+// UpdateCertificateOptionsRequest indicates an expected call of UpdateCertificateOptionsRequest
+func (mr *MockACMAPIMockRecorder) UpdateCertificateOptionsRequest(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCertificateOptionsRequest", reflect.TypeOf((*MockACMAPI)(nil).UpdateCertificateOptionsRequest), arg0)
+}
+
+// WaitUntilCertificateValidated mocks base method
+func (m *MockACMAPI) WaitUntilCertificateValidated(arg0 *acm.DescribeCertificateInput) error {
+	ret := m.ctrl.Call(m, "WaitUntilCertificateValidated", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// WaitUntilCertificateValidated indicates an expected call of WaitUntilCertificateValidated
+func (mr *MockACMAPIMockRecorder) WaitUntilCertificateValidated(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitUntilCertificateValidated", reflect.TypeOf((*MockACMAPI)(nil).WaitUntilCertificateValidated), arg0)
+}
+
+// WaitUntilCertificateValidatedWithContext mocks base method
+func (m *MockACMAPI) WaitUntilCertificateValidatedWithContext(arg0 aws.Context, arg1 *acm.DescribeCertificateInput, arg2 ...request.WaiterOption) error {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WaitUntilCertificateValidatedWithContext", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// WaitUntilCertificateValidatedWithContext indicates an expected call of WaitUntilCertificateValidatedWithContext
+func (mr *MockACMAPIMockRecorder) WaitUntilCertificateValidatedWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitUntilCertificateValidatedWithContext", reflect.TypeOf((*MockACMAPI)(nil).WaitUntilCertificateValidatedWithContext), varargs...)
 }
