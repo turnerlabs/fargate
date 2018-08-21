@@ -145,6 +145,8 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 
 				if record.Type == "SRV" && reg.Port != 0 {
 					port = strconv.FormatInt(reg.Port, 10)
+				} else if record.Type == "SRV" && reg.ContainerPort != 0 {
+					port = strconv.FormatInt(reg.ContainerPort, 10)
 				}
 
 				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%d\n",
