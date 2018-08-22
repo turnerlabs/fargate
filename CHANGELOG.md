@@ -1,3 +1,11 @@
+## 0.4.0 (2018-08-22)
+
+### Enhancements
+
+- Add the ability for `service env set` to read environment variables from a file (.e.g.; `fargate service env set -f .env`) ([#17](https://github.com/turnerlabs/fargate/pull/17))
+- Add service discovery info to `service info` command ([#21](https://github.com/turnerlabs/fargate/pull/21))
+
+
 ## 0.3.2 (2018-07-05)
 
 ### Bug Fixes
