@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 
@@ -13,6 +14,7 @@ import (
 	ECS "github.com/turnerlabs/fargate/ecs"
 	ELBV2 "github.com/turnerlabs/fargate/elbv2"
 	"github.com/spf13/cobra"
+	SD "github.com/turnerlabs/fargate/servicediscovery"
 )
 
 const statusActive = "ACTIVE"
@@ -52,6 +54,7 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 	ecs := ECS.New(sess, getClusterName())
 	ec2 := EC2.New(sess)
 	elbv2 := ELBV2.New(sess)
+	sd := SD.New(sess)
 	service := ecs.DescribeService(operation.ServiceName)
 	tasks := ecs.DescribeTasksForService(operation.ServiceName)
 
@@ -118,6 +121,46 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 				fmt.Printf("   %s=%s\n", envVar.Key, envVar.Value)
 			}
 		}
+	}
+
+	if len(service.ServiceRegistries) > 0 {
+		console.Header("Service Discovery")
+
+		w := new(tabwriter.Writer)
+		w.Init(os.Stdout, 0, 8, 1, '\t', 0)
+		fmt.Fprintln(w, "ID\tENDPOINT\tNAMESPACE\tTYPE\tPORT\tTTL\t")
+
+		for _, reg := range service.ServiceRegistries {
+			srv := sd.GetService(reg.RegistryArn)
+			ns := new(strings.Builder)
+
+			ns.WriteString(srv.Namespace.Name)
+
+			if srv.Namespace.Private {
+				ns.WriteString(" (PRIVATE)")
+			}
+
+			for _, record := range srv.DnsRecords {
+				port := ""
+
+				if record.Type == "SRV" && reg.Port != 0 {
+					port = strconv.FormatInt(reg.Port, 10)
+				} else if record.Type == "SRV" && reg.ContainerPort != 0 {
+					port = strconv.FormatInt(reg.ContainerPort, 10)
+				}
+
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%d\n",
+					srv.Id,
+					srv.Name+"."+srv.Namespace.Name+" ",
+					ns.String(),
+					record.Type,
+					port,
+					record.TTL,
+				)
+			}
+		}
+
+		w.Flush()
 	}
 
 	if len(tasks) > 0 {

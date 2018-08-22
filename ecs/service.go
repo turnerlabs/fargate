@@ -21,6 +21,13 @@ type CreateServiceInput struct {
 	TaskDefinitionArn string
 }
 
+type ServiceRegistry struct {
+	ContainerName string
+	ContainerPort int64
+	Port          int64
+	RegistryArn   string
+}
+
 type Service struct {
 	Cluster           string
 	Cpu               string
@@ -34,6 +41,7 @@ type Service struct {
 	PendingCount      int64
 	RunningCount      int64
 	SecurityGroupIds  []string
+	ServiceRegistries []ServiceRegistry
 	TargetGroupArn    string
 	TaskDefinitionArn string
 	TaskRole          string
@@ -222,6 +230,18 @@ func (ecs *ECS) DescribeServices(serviceArns []string) []Service {
 
 		if len(service.LoadBalancers) > 0 {
 			s.TargetGroupArn = aws.StringValue(service.LoadBalancers[0].TargetGroupArn)
+		}
+
+		for _, reg := range service.ServiceRegistries {
+			s.ServiceRegistries = append(
+				s.ServiceRegistries,
+				ServiceRegistry{
+					ContainerName: aws.StringValue(reg.ContainerName),
+					ContainerPort: aws.Int64Value(reg.ContainerPort),
+					Port:          aws.Int64Value(reg.Port),
+					RegistryArn:   aws.StringValue(reg.RegistryArn),
+				},
+			)
 		}
 
 		if len(taskDefinition.ContainerDefinitions) > 0 {

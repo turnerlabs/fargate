@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"strings"
-
 	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
 	ECS "github.com/turnerlabs/fargate/ecs"
@@ -19,10 +17,6 @@ func (o *ServiceEnvUnsetOperation) Validate() {
 	}
 }
 
-func (o *ServiceEnvUnsetOperation) SetKeys(keys []string) {
-	o.Keys = Map(keys, strings.ToUpper)
-}
-
 var serviceEnvUnsetCmd = &cobra.Command{
 	Use:   "unset --key <key-name> [--key <key-name>] ...",
 	Short: "Unset environment variables",
@@ -35,7 +29,7 @@ a key name multiple times to unset multiple variables.`,
 			ServiceName: getServiceName(),
 		}
 
-		operation.SetKeys(flagServiceEnvUnsetKeys)
+		operation.Keys = flagServiceEnvUnsetKeys
 		operation.Validate()
 		serviceEnvUnset(operation)
 	},

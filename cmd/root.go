@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -53,6 +54,7 @@ var (
 	region      string
 	sess        *session.Session
 	verbose     bool
+	identifier  *regexp.Regexp
 )
 
 var rootCmd = &cobra.Command{
@@ -159,6 +161,10 @@ func init() {
 func extractEnvVars(inputEnvVars []string) []ECS.EnvVar {
 	var envVars []ECS.EnvVar
 
+	if identifier == nil {
+		identifier = regexp.MustCompile("^[a-zA-Z_][a-zA-Z0-9_]*$")
+	}
+
 	if len(inputEnvVars) == 0 {
 		return envVars
 	}
@@ -170,9 +176,16 @@ func extractEnvVars(inputEnvVars []string) []ECS.EnvVar {
 			console.ErrorExit(fmt.Errorf("%s must be in the form of KEY=value", inputEnvVar), "Invalid environment variable")
 		}
 
+		key, value := splitInputEnvVar[0], splitInputEnvVar[1]
+
+		// make sure the key portion is a valid identifier
+		if !identifier.MatchString(key) {
+			console.ErrorExit(fmt.Errorf("Environment variable name %s must contain only letters, underscores, and digits", key), "Invalid environment variable")
+		}
+
 		envVar := ECS.EnvVar{
-			Key:   strings.ToUpper(splitInputEnvVar[0]),
-			Value: splitInputEnvVar[1],
+			Key:   key,
+			Value: value,
 		}
 
 		envVars = append(envVars, envVar)

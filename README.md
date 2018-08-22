@@ -221,13 +221,21 @@ specified with a sign such as +5 or -2.
 ##### fargate service env set
 
 ```console
-fargate service env set --env <key=value>
+fargate service env set [--env <key=value>] [--file <pathname>]
 ```
 
 Set environment variables
 
-At least one environment variable must be specified via the --env flag. Specify
---env with a key=value parameter multiple times to add multiple variables.
+At least one environment variable must be specified via either the --env or
+--file flags. You may specify any number of variables on the command line by
+repeating --env before each one, or else place multiple variables in a text
+file, one per line, and specify the filename with --file.
+
+Each --env parameter string or line in the file must be of the form
+"key=value", with no quotation marks and no whitespace around the "=" unless you want
+literal leading whitespace in the value.  Additionally, the "key" side must be
+a legal shell identifier, which means it must start with an ASCII letter A-Z or
+underscore and consist of only letters, digits, and underscores.
 
 ##### fargate service env unset
 
