@@ -25,10 +25,10 @@ var serviceDeployCmd = &cobra.Command{
 	Long: `Deploy applications to services
 
 The Docker container image to use in the service can be specified
-via the --image flag. 
+via the --image flag.
 
 The docker-compose.yml format is also supported using the --file flag.
-If -f is specified, the image and the environment variables in the 
+If -f is specified, the image and the environment variables in the
 docker-compose.yml file will be deployed.
 `,
 	Example: `
@@ -70,6 +70,7 @@ func deployService(operation *ServiceDeployOperation) {
 
 //deploy a docker-compose.yml file to fargate
 func deployDockerComposeFile(operation *ServiceDeployOperation) {
+	var taskDefinitionArn string
 
 	//read the compose file configuration
 	composeFile := dockercompose.NewComposeFile(operation.ComposeFile)
@@ -84,8 +85,14 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) {
 	ecs := ECS.New(sess, getClusterName())
 	ecsService := ecs.DescribeService(operation.ServiceName)
 
-	//register a new task definition based on the image and environment variables from the compose file
-	taskDefinitionArn := ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, dockerService.Environment)
+	//only update image if no environment variables are set in the compose file
+	if len(dockerService.Environment) == 0 {
+		//register a new task definition based on the image from the compose file
+		taskDefinitionArn = ecs.UpdateTaskDefinitionImage(ecsService.TaskDefinitionArn, dockerService.Image)
+	} else {
+		//register a new task definition based on the image and environment variables from the compose file
+		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, dockerService.Environment)
+	}
 
 	//update service with new task definition
 	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
