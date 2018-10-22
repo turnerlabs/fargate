@@ -18,6 +18,7 @@ const deployDockerComposeLabel = "aws.ecs.fargate.deploy"
 
 var flagServiceDeployImage string
 var flagServiceDeployDockerComposeFile string
+var flagServiceDeployDockerComposeImageOnly bool
 
 var serviceDeployCmd = &cobra.Command{
 	Use:   "deploy",
@@ -49,6 +50,8 @@ func init() {
 	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployImage, "image", "i", "", "Docker image to run in the service")
 
 	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployDockerComposeFile, "file", "f", "", "Specify a docker-compose.yml file to deploy. The image and environment variables in the file will be deployed.")
+
+	serviceDeployCmd.Flags().BoolVar(&flagServiceDeployDockerComposeImageOnly, "image-only", false, "Only deploy the image when a docker-compose.yml file is specified.")
 
 	serviceCmd.AddCommand(serviceDeployCmd)
 }
@@ -85,8 +88,8 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) {
 	ecs := ECS.New(sess, getClusterName())
 	ecsService := ecs.DescribeService(operation.ServiceName)
 
-	//only update image if no environment variables are set in the compose file
-	if len(dockerService.Environment) == 0 {
+	//only update image if --image-only flag is set
+	if flagServiceDeployDockerComposeImageOnly {
 		//register a new task definition based on the image from the compose file
 		taskDefinitionArn = ecs.UpdateTaskDefinitionImage(ecsService.TaskDefinitionArn, dockerService.Image)
 	} else {
