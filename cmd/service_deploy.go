@@ -18,6 +18,7 @@ const deployDockerComposeLabel = "aws.ecs.fargate.deploy"
 
 var flagServiceDeployImage string
 var flagServiceDeployDockerComposeFile string
+var flagServiceDeployDockerComposeImageOnly bool
 
 var serviceDeployCmd = &cobra.Command{
 	Use:   "deploy",
@@ -25,10 +26,10 @@ var serviceDeployCmd = &cobra.Command{
 	Long: `Deploy applications to services
 
 The Docker container image to use in the service can be specified
-via the --image flag. 
+via the --image flag.
 
 The docker-compose.yml format is also supported using the --file flag.
-If -f is specified, the image and the environment variables in the 
+If -f is specified, the image and the environment variables in the
 docker-compose.yml file will be deployed.
 `,
 	Example: `
@@ -50,6 +51,8 @@ func init() {
 
 	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployDockerComposeFile, "file", "f", "", "Specify a docker-compose.yml file to deploy. The image and environment variables in the file will be deployed.")
 
+	serviceDeployCmd.Flags().BoolVar(&flagServiceDeployDockerComposeImageOnly, "image-only", false, "Only deploy the image when a docker-compose.yml file is specified.")
+
 	serviceCmd.AddCommand(serviceDeployCmd)
 }
 
@@ -70,6 +73,7 @@ func deployService(operation *ServiceDeployOperation) {
 
 //deploy a docker-compose.yml file to fargate
 func deployDockerComposeFile(operation *ServiceDeployOperation) {
+	var taskDefinitionArn string
 
 	//read the compose file configuration
 	composeFile := dockercompose.NewComposeFile(operation.ComposeFile)
@@ -84,8 +88,14 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) {
 	ecs := ECS.New(sess, getClusterName())
 	ecsService := ecs.DescribeService(operation.ServiceName)
 
-	//register a new task definition based on the image and environment variables from the compose file
-	taskDefinitionArn := ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, dockerService.Environment)
+	//only update image if --image-only flag is set
+	if flagServiceDeployDockerComposeImageOnly {
+		//register a new task definition based on the image from the compose file
+		taskDefinitionArn = ecs.UpdateTaskDefinitionImage(ecsService.TaskDefinitionArn, dockerService.Image)
+	} else {
+		//register a new task definition based on the image and environment variables from the compose file
+		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, dockerService.Environment)
+	}
 
 	//update service with new task definition
 	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
