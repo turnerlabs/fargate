@@ -13,12 +13,13 @@ const (
 	keyService = "service"
 	keyVerbose = "verbose"
 	keyNoColor = "nocolor"
+	keyTask    = "task"
 )
 
 //configure viper to manage parameter input
 func initConfig(cmd *cobra.Command) {
 
-	//config file
+	//config file (fargate.yml)
 	viper.SetConfigName("fargate")
 	viper.AddConfigPath("./")
 	viper.ReadInConfig()
@@ -28,6 +29,7 @@ func initConfig(cmd *cobra.Command) {
 	viper.BindEnv(keyService, "FARGATE_SERVICE")
 	viper.BindEnv(keyVerbose, "FARGATE_VERBOSE")
 	viper.BindEnv(keyNoColor, "FARGATE_NOCOLOR")
+	viper.BindEnv(keyTask, "FARGATE_TASK")
 
 	//cli arg
 	initPFlag(keyCluster, cmd)
@@ -54,6 +56,16 @@ func getServiceName() string {
 	result := viper.GetString(keyService)
 	if result == "" {
 		fmt.Println("please specify service using: fargate.yml, FARGATE_SERVICE envvar, or --service")
+		os.Exit(-1)
+	}
+	return result
+}
+
+//task can come from fargate.yml, FARGATE_TASK, or --task cli arg
+func getTaskName() string {
+	result := viper.GetString(keyTask)
+	if result == "" {
+		fmt.Println("please specify task family using: fargate.yml, FARGATE_TASK envvar, or --task")
 		os.Exit(-1)
 	}
 	return result

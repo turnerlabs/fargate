@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"regexp"
@@ -158,6 +159,7 @@ func init() {
 	initConfig(rootCmd)
 }
 
+//converts array of KEY=VALUE to array of EnvVar types
 func extractEnvVars(inputEnvVars []string) []ECS.EnvVar {
 	var envVars []ECS.EnvVar
 
@@ -192,6 +194,21 @@ func extractEnvVars(inputEnvVars []string) []ECS.EnvVar {
 	}
 
 	return envVars
+}
+
+func convertEnvVarKeyValuesToECSEnvVars(inputEnvVars []string, envVarFile string) []ECS.EnvVar {
+	if envVarFile != "" {
+		file, err := os.Open(envVarFile)
+		if err != nil {
+			console.IssueExit("ERROR: unable to read env var file:", err)
+		}
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			inputEnvVars = append(inputEnvVars, scanner.Text())
+		}
+	}
+	return extractEnvVars(inputEnvVars)
 }
 
 func validateCpuAndMemory(inputCpuUnits, inputMebibytes string) error {
