@@ -24,7 +24,7 @@ type taskRegisterOperation struct {
 
 var taskRegisterCmd = &cobra.Command{
 	Use:   "register",
-	Short: "Registers a new Task Definition for the specified docker image or environment variables based on the latest revision of the task family and returns the new ARN.",
+	Short: "Registers a new task definition revision for the specified docker image or environment variables based on the latest revision of the task family and returns the new revision number.",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		operation := taskRegisterOperation{
@@ -89,8 +89,8 @@ func registerTask(op taskRegisterOperation) {
 
 	//update and register new task definition
 	ecs := ECS.New(sess, op.Cluster)
-	result := ecs.UpdateTaskDefinitionImageAndEnvVars(op.Task, image, envvars, replaceEnvVars)
+	newTD := ecs.UpdateTaskDefinitionImageAndEnvVars(op.Task, image, envvars, replaceEnvVars)
 
-	//output new arn
-	fmt.Println(result)
+	//output new revision
+	fmt.Println(ecs.GetRevisionNumber(newTD))
 }

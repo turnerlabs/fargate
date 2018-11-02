@@ -85,7 +85,7 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) {
 	if flagServiceDeployDockerComposeImageOnly {
 		//register a new task definition based on the image from the compose file
 		taskDefinitionArn = ecs.UpdateTaskDefinitionImage(ecsService.TaskDefinitionArn, dockerService.Image)
-		
+
 	} else {
 		//register a new task definition based on the image and environment variables from the compose file
 		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, envvars, true)
@@ -94,7 +94,7 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) {
 	//update service with new task definition
 	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
 
-	console.Info("Deployed %s to service %s as deployment %s", operation.ComposeFile, operation.ServiceName, ecs.GetDeploymentId(taskDefinitionArn))
+	console.Info("Deployed %s to service %s as revision %s", operation.ComposeFile, operation.ServiceName, ecs.GetRevisionNumber(taskDefinitionArn))
 }
 
 func getDockerServiceFromComposeFile(dockerComposeFile string) *dockercompose.Service {

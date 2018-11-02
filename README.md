@@ -322,7 +322,7 @@ Console, or until they are interrupted for any reason.
 fargate task register [--image <docker-image>] [-e KEY=value -e KEY2=value] [--env-file dev.env]
 ```
 
-Registers a new [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) for the specified docker image or environment variables based on the latest revision of the task family and returns the new ARN.
+Registers a new [task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) for the specified docker image or environment variables based on the latest revision of the task family and returns the new revision number.
 
 The Docker container image to use in the new Task Definition can be specified
 via the --image flag.

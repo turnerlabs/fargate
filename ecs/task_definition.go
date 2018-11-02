@@ -274,8 +274,8 @@ func (ecs *ECS) UpdateTaskDefinitionCpuAndMemory(taskDefinitionArn, cpu, memory 
 	return ecs.registerTaskDefinition(taskDefinition)
 }
 
-//GetDeploymentId returns the deployment id from a task definition
-func (ecs *ECS) GetDeploymentId(taskDefinitionArn string) string {
+//GetRevisionNumber returns the revision number from a task definition
+func (ecs *ECS) GetRevisionNumber(taskDefinitionArn string) string {
 	contents := strings.Split(taskDefinitionArn, ":")
 	return contents[len(contents)-1]
 }
