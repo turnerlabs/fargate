@@ -60,6 +60,7 @@ There are several ways to specify parameters.  Each item takes precedence over t
 cluster: my-cluster
 service: my-service
 task: my-task
+rule: my-event-rule
 verbose: false
 nocolor: true
 ```
@@ -77,6 +78,7 @@ nocolor: true
 
 - [Services](#services)
 - [Tasks](#tasks)
+- [Events](#events)
 
 #### Services
 
@@ -336,6 +338,33 @@ Registers a new [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/d
 
 If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy.
 
+
+#### Events
+
+##### Flags
+
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --rule | -r | | CloudWatch Events Rule |
+
+The `events` command provides subcommands for working with [CloudWatch Events](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/WhatIsCloudWatchEvents.html) (scheduled tasks, etc.)
+
+- [target](#fargate-events-target)
+
+
+##### fargate events target
+
+```console
+fargate events target --revision <revision>
+```
+
+"Deploys" (causes the next event rule invocation to run the new version) a task definition revision to a CloudWatch Event Rule by updating the rule target's `EcsParameters.TaskDefinitionArn`.
+
+A typical CI/CD system might do something like:
+```console
+REVISION=$(fargate task register -i 123456789.dkr.ecr.us-east-1.amazonaws.com/my-app:${VERSION}-${CIRCLE_BUILD_NUM} -e FOO=bar)
+fargate events target -r ${REVISION}
+```
 
 
 [region-table]: https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/
