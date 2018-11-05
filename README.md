@@ -59,6 +59,7 @@ There are several ways to specify parameters.  Each item takes precedence over t
 ```yaml
 cluster: my-cluster
 service: my-service
+task: my-task
 verbose: false
 nocolor: true
 ```
@@ -75,6 +76,7 @@ nocolor: true
 ### Commands
 
 - [Services](#services)
+- [Tasks](#tasks)
 
 #### Services
 
@@ -128,7 +130,9 @@ fargate service deploy [--file docker-compose.yml]
 
 Deploy image and environment variables defined in a [docker compose file](https://docs.docker.com/compose/overview/) to service
 
-Deploy a docker [image](https://docs.docker.com/compose/compose-file/#image) and [environment variables](https://docs.docker.com/compose/environment-variables/) defined in a docker compose file together as a single unit. This allows you to run `docker-compose up` locally to run your app the same way it will run in AWS. Note that while the docker-compose yaml configuration supports numerous options, only the image and environment variables are deployed to fargate. If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy. For example:
+Deploy a docker [image](https://docs.docker.com/compose/compose-file/#image) and [environment variables](https://docs.docker.com/compose/environment-variables/) defined in a docker compose file together as a single unit. Note that environments variables are replaced with what's in the compose file.
+
+This allows you to run `docker-compose up` locally to run your app the same way it will run in AWS. Note that while the docker-compose yaml configuration supports numerous options, only the image and environment variables are deployed to fargate. If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy. For example:
 
 ```yaml
 version: '3'
@@ -295,6 +299,43 @@ Restart service
 Creates a new set of tasks for the service and stops the previous tasks. This
 is useful if your service needs to reload data cached from an external source,
 for example.
+
+
+#### Tasks
+
+##### Flags
+
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --task | -t | | Task Definition Family |
+
+Tasks are one-time executions of your container. Instances of your task are run
+until you manually stop them either through AWS APIs, the AWS Management
+Console, or until they are interrupted for any reason.
+
+- [register](#fargate-task-register)
+
+
+##### fargate task register
+
+```console
+fargate task register [--image <docker-image>] [-e KEY=value -e KEY2=value] [--env-file dev.env]
+```
+
+Registers a new [task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) for the specified docker image or environment variables based on the latest revision of the task family and returns the new revision number.
+
+The Docker container image to use in the new Task Definition can be specified
+via the --image flag.
+
+
+```console
+fargate task register [--file docker-compose.yml]
+```
+
+Registers a new [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) using the [image](https://docs.docker.com/compose/compose-file/#image) and [environment variables](https://docs.docker.com/compose/environment-variables/) defined in a docker compose file. Note that environments variables are replaced with what's in the compose file.
+
+If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy.
+
 
 
 [region-table]: https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/

@@ -75,8 +75,31 @@ func deployService(operation *ServiceDeployOperation) {
 func deployDockerComposeFile(operation *ServiceDeployOperation) {
 	var taskDefinitionArn string
 
+	ecs := ECS.New(sess, getClusterName())
+	ecsService := ecs.DescribeService(operation.ServiceName)
+
+	dockerService := getDockerServiceFromComposeFile(operation.ComposeFile)
+	envvars := convertDockerComposeEnvVarsToECSEnvVars(dockerService)
+
+	//if --image-only flag is set, update image only
+	if flagServiceDeployDockerComposeImageOnly {
+		//register a new task definition based on the image from the compose file
+		taskDefinitionArn = ecs.UpdateTaskDefinitionImage(ecsService.TaskDefinitionArn, dockerService.Image)
+
+	} else {
+		//register a new task definition based on the image and environment variables from the compose file
+		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, envvars, true)
+	}
+
+	//update service with new task definition
+	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
+
+	console.Info("Deployed %s to service %s as revision %s", operation.ComposeFile, operation.ServiceName, ecs.GetRevisionNumber(taskDefinitionArn))
+}
+
+func getDockerServiceFromComposeFile(dockerComposeFile string) *dockercompose.Service {
 	//read the compose file configuration
-	composeFile := dockercompose.NewComposeFile(operation.ComposeFile)
+	composeFile := dockercompose.NewComposeFile(dockerComposeFile)
 	dockerCompose := composeFile.Config()
 
 	//determine which docker-compose service/container to deploy
@@ -85,22 +108,18 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) {
 		console.IssueExit(`Please indicate which docker container you'd like to deploy using the label "%s: 1"`, deployDockerComposeLabel)
 	}
 
-	ecs := ECS.New(sess, getClusterName())
-	ecsService := ecs.DescribeService(operation.ServiceName)
+	return dockerService
+}
 
-	//only update image if --image-only flag is set
-	if flagServiceDeployDockerComposeImageOnly {
-		//register a new task definition based on the image from the compose file
-		taskDefinitionArn = ecs.UpdateTaskDefinitionImage(ecsService.TaskDefinitionArn, dockerService.Image)
-	} else {
-		//register a new task definition based on the image and environment variables from the compose file
-		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, dockerService.Environment)
+func convertDockerComposeEnvVarsToECSEnvVars(service *dockercompose.Service) []ECS.EnvVar {
+	result := []ECS.EnvVar{}
+	for k, v := range service.Environment {
+		result = append(result, ECS.EnvVar{
+			Key:   k,
+			Value: v,
+		})
 	}
-
-	//update service with new task definition
-	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
-
-	console.Info("Deployed %s to service %s as deployment %s", operation.ComposeFile, operation.ServiceName, ecs.GetDeploymentId(taskDefinitionArn))
+	return result
 }
 
 //determine which docker-compose service/container to deploy

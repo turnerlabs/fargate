@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"bufio"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
 	ECS "github.com/turnerlabs/fargate/ecs"
-	"os"
 )
 
 type ServiceEnvSetOperation struct {
@@ -20,10 +21,14 @@ func (o *ServiceEnvSetOperation) Validate() {
 }
 
 func (o *ServiceEnvSetOperation) SetEnvVars(inputEnvVars []string, envVarFile string) {
+	o.EnvVars = processEnvVarArgs(inputEnvVars, envVarFile)
+}
+
+func processEnvVarArgs(inputEnvVars []string, envVarFile string) []ECS.EnvVar {
 	if envVarFile != "" {
 		file, err := os.Open(envVarFile)
 		if err != nil {
-			return
+			return []ECS.EnvVar{}
 		}
 		defer file.Close()
 		scanner := bufio.NewScanner(file)
@@ -31,7 +36,7 @@ func (o *ServiceEnvSetOperation) SetEnvVars(inputEnvVars []string, envVarFile st
 			inputEnvVars = append(inputEnvVars, scanner.Text())
 		}
 	}
-	o.EnvVars = extractEnvVars(inputEnvVars)
+	return extractEnvVars(inputEnvVars)
 }
 
 var flagServiceEnvSetEnvVars []string
