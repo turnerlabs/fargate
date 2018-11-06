@@ -280,6 +280,11 @@ func (ecs *ECS) GetRevisionNumber(taskDefinitionArn string) string {
 	return contents[len(contents)-1]
 }
 
+//GetTaskDefinitionARN builds an ARN
+func (ecs *ECS) GetTaskDefinitionARN(region string, account string, family string, revisionNumber string) string {
+	return fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/%s:%s", region, account, family, revisionNumber)
+}
+
 //GetCpuAndMemoryFromTaskDefinition returns the cpu/memory from a task definition
 func (ecs *ECS) GetCpuAndMemoryFromTaskDefinition(taskDefinitionArn string) (string, string) {
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
