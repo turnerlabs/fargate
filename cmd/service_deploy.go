@@ -39,7 +39,8 @@ docker-compose.yml file will be deployed.
 
 A task definition revision can be specified via the --revision flag.
 The revision number can either be absolute or a delta specified with a sign
-such as +5 or -2. Where -2 is to say "rollback to 2 configurations ago."
+such as +5 or -2, where -2 is "2 configurations ago" from the current
+deployed revision.
 `,
 	Example: `
 fargate service deploy -i 123456789.dkr.ecr.us-east-1.amazonaws.com/my-service:1.0
