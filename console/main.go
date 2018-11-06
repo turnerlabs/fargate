@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/mgutz/ansi"
 )
@@ -33,19 +34,25 @@ var (
 	orange = ansi.ColorCode("214+bh")
 )
 
+//LogLine prints a log line to the console
 func LogLine(prefix, msg string, color int, time string, excludePrefix bool) {
+	var colorCode, resetCode string
+
 	if excludePrefix {
 		prefix = ""
 	}
-	if time != "" {
-		prefix += " " + time
-	}
 	if Color {
-		colorCode := strconv.Itoa(color)
-		fmt.Println(ansi.ColorCode(colorCode) + prefix + reset + " " + msg)
-	} else {
-		fmt.Println(prefix + " " + msg)
+		colorCode = ansi.ColorCode(strconv.Itoa(color))
+		resetCode = reset
 	}
+
+	//add space to msg if there's something before it
+	if prefix != "" || time != "" {
+		msg = " " + msg
+	}
+
+	payload := fmt.Sprintf("%v%v%v%v%v", colorCode, prefix, time, resetCode, msg)
+	fmt.Println(strings.TrimSpace(payload))
 }
 
 func KeyValue(key, value string, a ...interface{}) {
