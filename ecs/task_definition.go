@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -290,4 +291,40 @@ func (ecs *ECS) GetCpuAndMemoryFromTaskDefinition(taskDefinitionArn string) (str
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
 
 	return aws.StringValue(taskDefinition.Cpu), aws.StringValue(taskDefinition.Memory)
+}
+
+//ResolveRevisionNumber returns a task defintion revision number by absolute value or expression
+func (ecs *ECS) ResolveRevisionNumber(taskDefinitionArn string, revisionExpression string) string {
+	var nextRevisionNumber int64
+
+	// if not a delta assume absolute
+	if revisionExpression[0] != '+' && revisionExpression[0] != '-' {
+		if _, err := strconv.ParseInt(revisionExpression, 10, 64); err != nil {
+			console.ErrorExit(err, "Could not resolve revision number")
+		}
+
+		return revisionExpression
+	}
+
+	currentRevisionNumber, err := strconv.ParseInt(ecs.GetRevisionNumber(taskDefinitionArn), 10, 64)
+
+	if err != nil {
+		console.ErrorExit(err, "Could not resolve revision number")
+	}
+
+	if s, err := strconv.ParseInt(revisionExpression[1:len(revisionExpression)], 10, 64); err == nil {
+		if revisionExpression[0] == '+' {
+			nextRevisionNumber = currentRevisionNumber + s
+		} else if revisionExpression[0] == '-' {
+			nextRevisionNumber = currentRevisionNumber - s
+		}
+	}
+
+	if nextRevisionNumber <= 0 {
+		console.IssueExit(`Unable to resolve revision number from expression: "%s"`, revisionExpression)
+	}
+
+	result := strconv.FormatInt(nextRevisionNumber, 10)
+
+	return result
 }
