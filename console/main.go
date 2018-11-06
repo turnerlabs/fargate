@@ -33,7 +33,13 @@ var (
 	orange = ansi.ColorCode("214+bh")
 )
 
-func LogLine(prefix, msg string, color int) {
+func LogLine(prefix, msg string, color int, time string, excludePrefix bool) {
+	if excludePrefix {
+		prefix = ""
+	}
+	if time != "" {
+		prefix += " " + time
+	}
 	if Color {
 		colorCode := strconv.Itoa(color)
 		fmt.Println(ansi.ColorCode(colorCode) + prefix + reset + " " + msg)

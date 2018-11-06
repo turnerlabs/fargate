@@ -316,6 +316,7 @@ until you manually stop them either through AWS APIs, the AWS Management
 Console, or until they are interrupted for any reason.
 
 - [register](#fargate-task-register)
+- [logs](#fargate-task-logs)
 
 
 ##### fargate task register
@@ -337,6 +338,50 @@ fargate task register [--file docker-compose.yml]
 Registers a new [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) using the [image](https://docs.docker.com/compose/compose-file/#image) and [environment variables](https://docs.docker.com/compose/environment-variables/) defined in a docker compose file. Note that environments variables are replaced with what's in the compose file.
 
 If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy.
+
+##### fargate task logs
+
+```console
+fargate task logs [--follow] [--start <time-expression>] [--end <time-expression>]
+                  [--filter <filter-expression>] [--task <task-id>] 
+                  [--container-name] [--time] [--no-prefix]
+```
+
+Show logs from tasks
+
+Assumes a cloudwatch log group with the following convention: `fargate/task/<task>`
+where `task` is specified via `--task`, or fargate.yml, or environment variable [options](#options)
+
+Return either a specific segment of task logs or tail logs in real-time using
+the --follow option. Logs are prefixed by their log stream name which is in the
+format of `fargate/<container-name>/<task-id>.`
+
+`--container-name` allows you to specifiy the container within the task definition to get logs for
+(defaults to `app`)
+
+Follow will continue to run and return logs until interrupted by Control-C. If
+`--follow` is passed `--end` cannot be specified.
+
+Logs can be returned for specific tasks by passing a task
+ID via the `--task` flag. Pass `--task` with a task ID multiple times in order to
+retrieve logs from multiple specific tasks.
+
+A specific window of logs can be requested by passing `--start` and `--end` options
+with a time expression. The time expression can be either a duration or a
+timestamp:
+
+  - Duration (e.g. -1h [one hour ago], -1h10m30s [one hour, ten minutes, and
+    thirty seconds ago], 2h [two hours from now])
+  - Timestamp with optional timezone in the format of YYYY-MM-DD HH:MM:SS [TZ];
+    timezone will default to UTC if omitted (e.g. 2017-12-22 15:10:03 EST)
+
+You can filter logs for specific term by passing a filter expression via the
+`--filter` flag. Pass a single term to search for that term, pass multiple terms
+to search for log messages that include all terms.
+
+`--time` includes the log timestamp in the output
+
+`--no-prefix` excludes the log stream prefix from the output
 
 
 #### Events
