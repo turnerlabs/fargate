@@ -56,6 +56,12 @@ fargate service deploy -r 37
 			ComposeFile: flagServiceDeployDockerComposeFile,
 			Revision:    flagServiceDeployRevision,
 		}
+
+		if !validateFlags(operation) {
+			cmd.Help()
+			return
+		}
+
 		deployService(operation)
 	},
 }
@@ -176,4 +182,20 @@ func getDockerServiceToDeploy(dc *dockercompose.DockerCompose) (string, *dockerc
 		}
 	}
 	return name, service
+}
+
+//Check incompatible flag combinations
+func validateFlags(operation *ServiceDeployOperation) bool {
+	strFlags := []string{operation.Image, operation.ComposeFile, operation.Revision}
+	setFlags := make([]string, 0)
+
+	for _, v := range strFlags {
+		if v != "" {
+			setFlags = append(setFlags, v)
+		}
+	}
+
+	valid := len(setFlags) == 1
+
+	return valid
 }
