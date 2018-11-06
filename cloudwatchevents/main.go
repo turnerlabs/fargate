@@ -1,6 +1,8 @@
 package cloudwatchevents
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 	"github.com/turnerlabs/fargate/console"
@@ -42,7 +44,16 @@ func (c *CloudWatchEvents) UpdateTargetRevision(rule string, revision string) {
 		Targets: resp.Targets,
 	}
 	putResp, err := c.svc.PutTargets(putInput)
-	if *putResp.FailedEntryCount != 0 && len(putResp.FailedEntries) != 0 {
-		console.IssueExit("PutTargets failed")
+	if err != nil {
+		console.ErrorExit(err, "PutTargets failed")
+	}
+	if putResp != nil {
+		if *putResp.FailedEntryCount != 0 && len(putResp.FailedEntries) != 0 {
+			for _, entry := range putResp.FailedEntries {
+				fmt.Printf("TargetId: %s; ErrorCode: %s; ErrorMessage: %s", *entry.TargetId, *entry.ErrorCode, *entry.ErrorMessage)
+				fmt.Println()
+			}
+			console.IssueExit("PutTargets failed")
+		}
 	}
 }
