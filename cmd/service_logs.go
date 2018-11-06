@@ -7,11 +7,13 @@ import (
 )
 
 var (
-	flagServiceLogsFilter    string
-	flagServiceLogsEndTime   string
-	flagServiceLogsStartTime string
-	flagServiceLogsFollow    bool
-	flagServiceLogsTasks     []string
+	flagServiceLogsFilter            string
+	flagServiceLogsEndTime           string
+	flagServiceLogsStartTime         string
+	flagServiceLogsFollow            bool
+	flagServiceLogsTasks             []string
+	flagServiceLogsTime              bool
+	flagServiceLogsNoLogStreamPrefix bool
 )
 
 var serviceLogsCmd = &cobra.Command{
@@ -41,15 +43,22 @@ timestamp:
 
 You can filter logs for specific term by passing a filter expression via the
 --filter flag. Pass a single term to search for that term, pass multiple terms
-to search for log messages that include all terms.`,
+to search for log messages that include all terms.
+
+--time includes the log timestamp in the output
+
+--no-prefix excludes the log stream prefix from the output
+`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &GetLogsOperation{
-			LogGroupName: fmt.Sprintf(serviceLogGroupFormat, getServiceName()),
-			Filter:       flagServiceLogsFilter,
-			Follow:       flagServiceLogsFollow,
-			Namespace:    getServiceName(),
+			LogGroupName:      fmt.Sprintf(serviceLogGroupFormat, getServiceName()),
+			Filter:            flagServiceLogsFilter,
+			Follow:            flagServiceLogsFollow,
+			Namespace:         getServiceName(),
+			IncludeTime:       flagServiceLogsTime,
+			NoLogStreamPrefix: flagServiceLogsNoLogStreamPrefix,
 		}
 
 		operation.AddTasks(flagServiceLogsTasks)
@@ -68,4 +77,6 @@ func init() {
 	serviceLogsCmd.Flags().StringVar(&flagServiceLogsStartTime, "start", "", "Earliest time to return logs (e.g. -1h, 2018-01-01 09:36:00 EST")
 	serviceLogsCmd.Flags().StringVar(&flagServiceLogsEndTime, "end", "", "Latest time to return logs (e.g. 3y, 2021-01-20 12:00:00 EST")
 	serviceLogsCmd.Flags().StringSliceVarP(&flagServiceLogsTasks, "task", "t", []string{}, "Show logs from specific task (can be specified multiple times)")
+	serviceLogsCmd.PersistentFlags().BoolVarP(&flagServiceLogsTime, "time", "T", false, "append time to logs")
+	serviceLogsCmd.PersistentFlags().BoolVarP(&flagServiceLogsNoLogStreamPrefix, "no-prefix", "", false, "don't include log stream prefix in output")
 }

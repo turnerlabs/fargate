@@ -175,6 +175,7 @@ update to configuration such a CPU, memory, or environment variables.
 ```console
 fargate service logs [--follow] [--start <time-expression>] [--end <time-expression>]
                      [--filter <filter-expression>] [--task <task-id>]
+                     [--time] [--no-prefix]
 ```
 
 Show logs from tasks in a service
@@ -203,6 +204,10 @@ You can filter logs for specific term by passing a filter expression via the
 --filter flag. Pass a single term to search for that term, pass multiple terms
 to search for log messages that include all terms. See the [CloudWatch Logs
 documentation][cwl-filter-expression] for more details.
+
+--time includes the log timestamp in the output
+
+--no-prefix excludes the log stream prefix from the output
 
 ##### fargate service ps
 
