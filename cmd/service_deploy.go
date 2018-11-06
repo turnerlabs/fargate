@@ -132,6 +132,11 @@ func deployRevision(operation *ServiceDeployOperation) {
 
 	//build full task definiton arn with revision
 	revisionNumber := ecs.ResolveRevisionNumber(service.TaskDefinitionArn, operation.Revision)
+
+	if revisionNumber == "" {
+		console.IssueExit("Could not resolve revision number")
+	}
+
 	taskDefinitionArn := ecs.GetTaskDefinitionARN(operation.Region, account, operation.Task, revisionNumber)
 
 	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)

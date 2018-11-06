@@ -295,21 +295,26 @@ func (ecs *ECS) GetCpuAndMemoryFromTaskDefinition(taskDefinitionArn string) (str
 
 //ResolveRevisionNumber returns a task defintion revision number by absolute value or expression
 func (ecs *ECS) ResolveRevisionNumber(taskDefinitionArn string, revisionExpression string) string {
+	currentRevision := ecs.GetRevisionNumber(taskDefinitionArn)
+	currentRevisionNumber, err := strconv.ParseInt(currentRevision, 10, 64)
+
+	if err != nil {
+		return ""
+	}
+
+	if revisionExpression == "" {
+		return currentRevision
+	}
+
 	var nextRevisionNumber int64
 
 	// if not a delta assume absolute
 	if revisionExpression[0] != '+' && revisionExpression[0] != '-' {
 		if _, err := strconv.ParseInt(revisionExpression, 10, 64); err != nil {
-			console.ErrorExit(err, "Could not resolve revision number")
+			return ""
 		}
 
 		return revisionExpression
-	}
-
-	currentRevisionNumber, err := strconv.ParseInt(ecs.GetRevisionNumber(taskDefinitionArn), 10, 64)
-
-	if err != nil {
-		console.ErrorExit(err, "Could not resolve revision number")
 	}
 
 	if s, err := strconv.ParseInt(revisionExpression[1:len(revisionExpression)], 10, 64); err == nil {
@@ -321,7 +326,7 @@ func (ecs *ECS) ResolveRevisionNumber(taskDefinitionArn string, revisionExpressi
 	}
 
 	if nextRevisionNumber <= 0 {
-		console.IssueExit(`Unable to resolve revision number from expression: "%s"`, revisionExpression)
+		return ""
 	}
 
 	result := strconv.FormatInt(nextRevisionNumber, 10)
