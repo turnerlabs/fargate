@@ -6,6 +6,25 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 )
 
+func TestGetTaskFamily(t *testing.T) {
+	var got, expected string
+
+	sess := session.Must(session.NewSession())
+	ecs := New(sess, "my-app-dev")
+
+	got = ecs.GetTaskFamily("arn:aws:ecs:us-east-1:000000000000:task-definition/my-app-dev:25")
+	expected = "my-app-dev"
+	if got != expected {
+		t.Errorf("Expected %s, got %s", expected, got)
+	}
+
+	got = ecs.GetTaskFamily("arn:aws:ecs:us-east-1:000000000000:task-definition/app-prod:2")
+	expected = "app-prod"
+	if got != expected {
+		t.Errorf("Expected %s, got %s", expected, got)
+	}
+}
+
 func TestResolveRevisionNumber_Absolute(t *testing.T) {
 	sess := session.Must(session.NewSession())
 	ecs := New(sess, "my-app-dev")

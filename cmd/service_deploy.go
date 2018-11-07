@@ -15,7 +15,6 @@ type ServiceDeployOperation struct {
 	ComposeFile string
 	Region      string
 	Revision    string
-	Task        string
 }
 
 const deployDockerComposeLabel = "aws.ecs.fargate.deploy"
@@ -50,7 +49,6 @@ fargate service deploy -r 37
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceDeployOperation{
 			ServiceName: getServiceName(),
-			Task:        getTaskName(),
 			Region:      region,
 			Image:       flagServiceDeployImage,
 			ComposeFile: flagServiceDeployDockerComposeFile,
@@ -132,12 +130,13 @@ func deployRevision(operation *ServiceDeployOperation) {
 
 	//build full task definiton arn with revision
 	revisionNumber := ecs.ResolveRevisionNumber(service.TaskDefinitionArn, operation.Revision)
+	taskFamily := ecs.GetTaskFamily(service.TaskDefinitionArn)
 
 	if revisionNumber == "" {
 		console.IssueExit("Could not resolve revision number")
 	}
 
-	taskDefinitionArn := ecs.GetTaskDefinitionARN(operation.Region, account, operation.Task, revisionNumber)
+	taskDefinitionArn := ecs.GetTaskDefinitionARN(operation.Region, account, taskFamily, revisionNumber)
 
 	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
 

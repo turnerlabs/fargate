@@ -286,6 +286,12 @@ func (ecs *ECS) GetTaskDefinitionARN(region string, account string, family strin
 	return fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/%s:%s", region, account, family, revisionNumber)
 }
 
+//GetTaskFamily returns the task family from a task definition ARN
+func (ecs *ECS) GetTaskFamily(taskDefinitionArn string) string {
+	contents := strings.Split(taskDefinitionArn, ":")
+	return strings.TrimPrefix(contents[len(contents)-2], "task-definition/")
+}
+
 //GetCpuAndMemoryFromTaskDefinition returns the cpu/memory from a task definition
 func (ecs *ECS) GetCpuAndMemoryFromTaskDefinition(taskDefinitionArn string) (string, string) {
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
