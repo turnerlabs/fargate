@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -285,9 +286,56 @@ func (ecs *ECS) GetTaskDefinitionARN(region string, account string, family strin
 	return fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/%s:%s", region, account, family, revisionNumber)
 }
 
+//GetTaskFamily returns the task family from a task definition ARN
+func (ecs *ECS) GetTaskFamily(taskDefinitionArn string) string {
+	contents := strings.Split(taskDefinitionArn, ":")
+	return strings.TrimPrefix(contents[len(contents)-2], "task-definition/")
+}
+
 //GetCpuAndMemoryFromTaskDefinition returns the cpu/memory from a task definition
 func (ecs *ECS) GetCpuAndMemoryFromTaskDefinition(taskDefinitionArn string) (string, string) {
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
 
 	return aws.StringValue(taskDefinition.Cpu), aws.StringValue(taskDefinition.Memory)
+}
+
+//ResolveRevisionNumber returns a task defintion revision number by absolute value or expression
+func (ecs *ECS) ResolveRevisionNumber(taskDefinitionArn string, revisionExpression string) string {
+	currentRevision := ecs.GetRevisionNumber(taskDefinitionArn)
+	currentRevisionNumber, err := strconv.ParseInt(currentRevision, 10, 64)
+
+	if err != nil {
+		return ""
+	}
+
+	if revisionExpression == "" {
+		return currentRevision
+	}
+
+	var nextRevisionNumber int64
+
+	// if not a delta assume absolute
+	if revisionExpression[0] != '+' && revisionExpression[0] != '-' {
+		if _, err := strconv.ParseInt(revisionExpression, 10, 64); err != nil {
+			return ""
+		}
+
+		return revisionExpression
+	}
+
+	if s, err := strconv.ParseInt(revisionExpression[1:len(revisionExpression)], 10, 64); err == nil {
+		if revisionExpression[0] == '+' {
+			nextRevisionNumber = currentRevisionNumber + s
+		} else if revisionExpression[0] == '-' {
+			nextRevisionNumber = currentRevisionNumber - s
+		}
+	}
+
+	if nextRevisionNumber <= 0 {
+		return ""
+	}
+
+	result := strconv.FormatInt(nextRevisionNumber, 10)
+
+	return result
 }
