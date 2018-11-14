@@ -59,6 +59,8 @@ There are several ways to specify parameters.  Each item takes precedence over t
 ```yaml
 cluster: my-cluster
 service: my-service
+task: my-task
+rule: my-event-rule
 verbose: false
 nocolor: true
 ```
@@ -75,6 +77,8 @@ nocolor: true
 ### Commands
 
 - [Services](#services)
+- [Tasks](#tasks)
+- [Events](#events)
 
 #### Services
 
@@ -128,7 +132,9 @@ fargate service deploy [--file docker-compose.yml]
 
 Deploy image and environment variables defined in a [docker compose file](https://docs.docker.com/compose/overview/) to service
 
-Deploy a docker [image](https://docs.docker.com/compose/compose-file/#image) and [environment variables](https://docs.docker.com/compose/environment-variables/) defined in a docker compose file together as a single unit. This allows you to run `docker-compose up` locally to run your app the same way it will run in AWS. Note that while the docker-compose yaml configuration supports numerous options, only the image and environment variables are deployed to fargate. If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy. For example:
+Deploy a docker [image](https://docs.docker.com/compose/compose-file/#image) and [environment variables](https://docs.docker.com/compose/environment-variables/) defined in a docker compose file together as a single unit. Note that environments variables are replaced with what's in the compose file.
+
+This allows you to run `docker-compose up` locally to run your app the same way it will run in AWS. Note that while the docker-compose yaml configuration supports numerous options, only the image and environment variables are deployed to fargate. If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy. For example:
 
 ```yaml
 version: '3'
@@ -169,6 +175,7 @@ update to configuration such a CPU, memory, or environment variables.
 ```console
 fargate service logs [--follow] [--start <time-expression>] [--end <time-expression>]
                      [--filter <filter-expression>] [--task <task-id>]
+                     [--time] [--no-prefix]
 ```
 
 Show logs from tasks in a service
@@ -197,6 +204,10 @@ You can filter logs for specific term by passing a filter expression via the
 --filter flag. Pass a single term to search for that term, pass multiple terms
 to search for log messages that include all terms. See the [CloudWatch Logs
 documentation][cwl-filter-expression] for more details.
+
+--time includes the log timestamp in the output
+
+--no-prefix excludes the log stream prefix from the output
 
 ##### fargate service ps
 
@@ -295,6 +306,115 @@ Restart service
 Creates a new set of tasks for the service and stops the previous tasks. This
 is useful if your service needs to reload data cached from an external source,
 for example.
+
+
+#### Tasks
+
+##### Flags
+
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --task | -t | | Task Definition Family |
+
+Tasks are one-time executions of your container. Instances of your task are run
+until you manually stop them either through AWS APIs, the AWS Management
+Console, or until they are interrupted for any reason.
+
+- [register](#fargate-task-register)
+- [logs](#fargate-task-logs)
+
+
+##### fargate task register
+
+```console
+fargate task register [--image <docker-image>] [-e KEY=value -e KEY2=value] [--env-file dev.env]
+```
+
+Registers a new [task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) for the specified docker image or environment variables based on the latest revision of the task family and returns the new revision number.
+
+The Docker container image to use in the new Task Definition can be specified
+via the --image flag.
+
+
+```console
+fargate task register [--file docker-compose.yml]
+```
+
+Registers a new [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) using the [image](https://docs.docker.com/compose/compose-file/#image) and [environment variables](https://docs.docker.com/compose/environment-variables/) defined in a docker compose file. Note that environments variables are replaced with what's in the compose file.
+
+If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy.
+
+##### fargate task logs
+
+```console
+fargate task logs [--follow] [--start <time-expression>] [--end <time-expression>]
+                  [--filter <filter-expression>] [--task <task-id>] 
+                  [--container-name] [--time] [--no-prefix]
+```
+
+Show logs from tasks
+
+Assumes a cloudwatch log group with the following convention: `fargate/task/<task>`
+where `task` is specified via `--task`, or fargate.yml, or environment variable [options](#options)
+
+Return either a specific segment of task logs or tail logs in real-time using
+the --follow option. Logs are prefixed by their log stream name which is in the
+format of `fargate/<container-name>/<task-id>.`
+
+`--container-name` allows you to specifiy the container within the task definition to get logs for
+(defaults to `app`)
+
+Follow will continue to run and return logs until interrupted by Control-C. If
+`--follow` is passed `--end` cannot be specified.
+
+Logs can be returned for specific tasks by passing a task
+ID via the `--task` flag. Pass `--task` with a task ID multiple times in order to
+retrieve logs from multiple specific tasks.
+
+A specific window of logs can be requested by passing `--start` and `--end` options
+with a time expression. The time expression can be either a duration or a
+timestamp:
+
+  - Duration (e.g. -1h [one hour ago], -1h10m30s [one hour, ten minutes, and
+    thirty seconds ago], 2h [two hours from now])
+  - Timestamp with optional timezone in the format of YYYY-MM-DD HH:MM:SS [TZ];
+    timezone will default to UTC if omitted (e.g. 2017-12-22 15:10:03 EST)
+
+You can filter logs for specific term by passing a filter expression via the
+`--filter` flag. Pass a single term to search for that term, pass multiple terms
+to search for log messages that include all terms.
+
+`--time` includes the log timestamp in the output
+
+`--no-prefix` excludes the log stream prefix from the output
+
+
+#### Events
+
+##### Flags
+
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --rule | -r | | CloudWatch Events Rule |
+
+The `events` command provides subcommands for working with [CloudWatch Events](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/WhatIsCloudWatchEvents.html) (scheduled tasks, etc.)
+
+- [target](#fargate-events-target)
+
+
+##### fargate events target
+
+```console
+fargate events target --revision <revision>
+```
+
+"Deploys" (causes the next event rule invocation to run the new version) a task definition revision to a CloudWatch Event Rule by updating the rule target's `EcsParameters.TaskDefinitionArn`.
+
+A typical CI/CD system might do something like:
+```console
+REVISION=$(fargate task register -i 123456789.dkr.ecr.us-east-1.amazonaws.com/my-app:${VERSION}-${CIRCLE_BUILD_NUM} -e FOO=bar)
+fargate events target -r ${REVISION}
+```
 
 
 [region-table]: https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/

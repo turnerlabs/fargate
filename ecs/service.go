@@ -274,7 +274,7 @@ func (ecs *ECS) DescribeServices(serviceArns []string) []Service {
 				PendingCount: aws.Int64Value(d.PendingCount),
 				RunningCount: aws.Int64Value(d.RunningCount),
 				CreatedAt:    aws.TimeValue(d.CreatedAt),
-				Id:           ecs.GetDeploymentId(aws.StringValue(d.TaskDefinition)),
+				Id:           ecs.GetRevisionNumber(aws.StringValue(d.TaskDefinition)),
 			}
 
 			deploymentTaskDefinition := ecs.DescribeTaskDefinition(aws.StringValue(d.TaskDefinition))

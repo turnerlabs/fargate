@@ -13,12 +13,14 @@ const (
 	keyService = "service"
 	keyVerbose = "verbose"
 	keyNoColor = "nocolor"
+	keyTask    = "task"
+	keyRule    = "rule"
 )
 
 //configure viper to manage parameter input
 func initConfig(cmd *cobra.Command) {
 
-	//config file
+	//config file (fargate.yml)
 	viper.SetConfigName("fargate")
 	viper.AddConfigPath("./")
 	viper.ReadInConfig()
@@ -28,6 +30,8 @@ func initConfig(cmd *cobra.Command) {
 	viper.BindEnv(keyService, "FARGATE_SERVICE")
 	viper.BindEnv(keyVerbose, "FARGATE_VERBOSE")
 	viper.BindEnv(keyNoColor, "FARGATE_NOCOLOR")
+	viper.BindEnv(keyTask, "FARGATE_TASK")
+	viper.BindEnv(keyRule, "FARGATE_RULE")
 
 	//cli arg
 	initPFlag(keyCluster, cmd)
@@ -58,6 +62,27 @@ func getServiceName() string {
 	}
 	return result
 }
+
+//task can come from fargate.yml, FARGATE_TASK, or --task cli arg
+func getTaskName() string {
+	result := viper.GetString(keyTask)
+	if result == "" {
+		fmt.Println("please specify task family using: fargate.yml, FARGATE_TASK envvar, or --task")
+		os.Exit(-1)
+	}
+	return result
+}
+
+//rule can come from fargate.yml, FARGATE_RULE, or --task cli arg
+func getRuleName() string {
+	result := viper.GetString(keyRule)
+	if result == "" {
+		fmt.Println("please specify rule using: fargate.yml, FARGATE_RULE envvar, or --task")
+		os.Exit(-1)
+	}
+	return result
+}
+
 
 func getVerbose() bool {
 	return viper.GetBool(keyVerbose)

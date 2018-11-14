@@ -158,6 +158,7 @@ func init() {
 	initConfig(rootCmd)
 }
 
+//converts array of KEY=VALUE to array of EnvVar types
 func extractEnvVars(inputEnvVars []string) []ECS.EnvVar {
 	var envVars []ECS.EnvVar
 

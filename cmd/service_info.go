@@ -113,13 +113,13 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 				}
 			}
 		}
+	}
 
-		if len(service.EnvVars) > 0 {
-			console.KeyValue("Environment Variables", "\n")
+	if len(service.EnvVars) > 0 {
+		console.KeyValue("Environment Variables", "\n")
 
-			for _, envVar := range service.EnvVars {
-				fmt.Printf("   %s=%s\n", envVar.Key, envVar.Value)
-			}
+		for _, envVar := range service.EnvVars {
+			fmt.Printf("   %s=%s\n", envVar.Key, envVar.Value)
 		}
 	}
 

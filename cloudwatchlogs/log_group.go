@@ -91,7 +91,7 @@ func (cwl *CloudWatchLogs) GetLogs(i *GetLogsInput) []LogLine {
 	)
 
 	if err != nil {
-		console.ErrorExit(err, "Could not get logs")
+		console.ErrorExit(err, "Could not get logs for: " + i.LogGroupName)
 	}
 
 	return logLines

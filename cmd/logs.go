@@ -21,15 +21,17 @@ const (
 type Empty struct{}
 
 type GetLogsOperation struct {
-	LogGroupName    string
-	Namespace       string
-	EndTime         time.Time
-	Filter          string
-	Follow          bool
-	LogStreamColors map[string]int
-	LogStreamNames  []string
-	StartTime       time.Time
-	EventCache      *lru.Cache
+	LogGroupName      string
+	Namespace         string
+	EndTime           time.Time
+	Filter            string
+	Follow            bool
+	LogStreamColors   map[string]int
+	LogStreamNames    []string
+	StartTime         time.Time
+	EventCache        *lru.Cache
+	IncludeTime       bool
+	NoLogStreamPrefix bool
 }
 
 func (o *GetLogsOperation) AddStartTime(rawStartTime string) {
@@ -141,10 +143,18 @@ func getLogs(operation *GetLogsOperation) {
 	}
 
 	for _, logLine := range cwl.GetLogs(input) {
+
+		//format time if needed
+		var logTime string
+		if operation.IncludeTime {
+			logTime = logLine.Timestamp.Format(time.RFC3339)
+		}
+
+		// logLine.Timestamp
 		streamColor := operation.GetStreamColor(logLine.LogStreamName)
 
 		if !operation.SeenEvent(logLine.EventId) {
-			console.LogLine(logLine.LogStreamName, logLine.Message, streamColor)
+			console.LogLine(logLine.LogStreamName, logLine.Message, streamColor, logTime, operation.NoLogStreamPrefix)
 		}
 	}
 }

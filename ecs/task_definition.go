@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -126,46 +127,49 @@ func (ecs *ECS) DescribeTaskDefinition(taskDefinitionArn string) *awsecs.TaskDef
 	return taskDefinitionCache[taskDefinitionArn]
 }
 
+//UpdateTaskDefinitionImage registers a new task definition with the updated image
 func (ecs *ECS) UpdateTaskDefinitionImage(taskDefinitionArn, image string) string {
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
 	taskDefinition.ContainerDefinitions[0].Image = aws.String(image)
-
-	resp, err := ecs.svc.RegisterTaskDefinition(
-		&awsecs.RegisterTaskDefinitionInput{
-			ContainerDefinitions:    taskDefinition.ContainerDefinitions,
-			Cpu:                     taskDefinition.Cpu,
-			ExecutionRoleArn:        taskDefinition.ExecutionRoleArn,
-			Family:                  taskDefinition.Family,
-			Memory:                  taskDefinition.Memory,
-			NetworkMode:             taskDefinition.NetworkMode,
-			RequiresCompatibilities: taskDefinition.RequiresCompatibilities,
-			TaskRoleArn:             taskDefinition.TaskRoleArn,
-		},
-	)
-
-	if err != nil {
-		console.ErrorExit(err, "Could not register ECS task definition")
-	}
-
-	return aws.StringValue(resp.TaskDefinition.TaskDefinitionArn)
+	return ecs.registerTaskDefinition(taskDefinition)
 }
 
-// UpdateTaskDefinitionImageAndEnvVars creates a new, updated task definition
-// based on the specified image and env vars
-func (ecs *ECS) UpdateTaskDefinitionImageAndEnvVars(taskDefinitionArn, image string, environmentVariables map[string]string) string {
+// UpdateTaskDefinitionImageAndReplaceEnvVars creates a new, updated task definition
+// based on the specified image and env vars.
+// Note that any existing envvars are replaced by the new ones
+func (ecs *ECS) UpdateTaskDefinitionImageAndEnvVars(taskDefinitionArnOrFamily string, image string, environmentVariables []EnvVar, replaceEnvVars bool) string {
 
-	//fetch current task definition
-	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
+	//fetch task definition details (for specific or latest active)
+	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArnOrFamily)
 
-	//update image
-	taskDefinition.ContainerDefinitions[0].Image = aws.String(image)
+	//which container are we updating?
+	container := taskDefinition.ContainerDefinitions[0]
 
-	//update env vars
-	envvars := []EnvVar{}
-	for k, v := range environmentVariables {
-		envvars = append(envvars, EnvVar{Key: k, Value: v})
+	//update image if specified
+	if image != "" {
+		container.Image = aws.String(image)
 	}
-	taskDefinition.ContainerDefinitions[0].Environment = convertEnvVars(envvars)
+
+	//convert envvars to aws input format
+	if len(environmentVariables) > 0 {
+		envvars := convertEnvVars(environmentVariables)
+
+		//is this a replace or add operation?
+		if replaceEnvVars {
+			container.Environment = envvars
+
+		} else {
+			for _, e := range envvars {
+				container.Environment = append(container.Environment, e)
+			}
+		}
+	}
+
+	return ecs.registerTaskDefinition(taskDefinition)
+}
+
+//registers a new task definition based on a task definition struct
+func (ecs *ECS) registerTaskDefinition(taskDefinition *awsecs.TaskDefinition) string {
 
 	//register a new task definition
 	resp, err := ecs.svc.RegisterTaskDefinition(
@@ -179,15 +183,16 @@ func (ecs *ECS) UpdateTaskDefinitionImageAndEnvVars(taskDefinitionArn, image str
 			RequiresCompatibilities: taskDefinition.RequiresCompatibilities,
 			TaskRoleArn:             taskDefinition.TaskRoleArn,
 		},
-	)
+	)	
 
 	if err != nil {
 		console.ErrorExit(err, "Could not register ECS task definition")
 	}
 
-	return aws.StringValue(resp.TaskDefinition.TaskDefinitionArn)
+	return aws.StringValue(resp.TaskDefinition.TaskDefinitionArn)	
 }
 
+//AddEnvVarsToTaskDefinition registers a new task definition with the envvars appended
 func (ecs *ECS) AddEnvVarsToTaskDefinition(taskDefinitionArn string, envVars []EnvVar) string {
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
 
@@ -203,24 +208,7 @@ func (ecs *ECS) AddEnvVarsToTaskDefinition(taskDefinitionArn string, envVars []E
 		)
 	}
 
-	resp, err := ecs.svc.RegisterTaskDefinition(
-		&awsecs.RegisterTaskDefinitionInput{
-			ContainerDefinitions:    taskDefinition.ContainerDefinitions,
-			Cpu:                     taskDefinition.Cpu,
-			ExecutionRoleArn:        taskDefinition.ExecutionRoleArn,
-			Family:                  taskDefinition.Family,
-			Memory:                  taskDefinition.Memory,
-			NetworkMode:             taskDefinition.NetworkMode,
-			RequiresCompatibilities: taskDefinition.RequiresCompatibilities,
-			TaskRoleArn:             taskDefinition.TaskRoleArn,
-		},
-	)
-
-	if err != nil {
-		console.ErrorExit(err, "Could not register ECS task definition")
-	}
-
-	return aws.StringValue(resp.TaskDefinition.TaskDefinitionArn)
+	return ecs.registerTaskDefinition(taskDefinition)
 }
 
 //RemoveEnvVarsFromTaskDefinition registers a new task definition with the specified keys removed
@@ -251,26 +239,10 @@ func (ecs *ECS) RemoveEnvVarsFromTaskDefinition(taskDefinitionArn string, keys [
 
 	taskDefinition.ContainerDefinitions[0].Environment = newEnvironment
 
-	resp, err := ecs.svc.RegisterTaskDefinition(
-		&awsecs.RegisterTaskDefinitionInput{
-			ContainerDefinitions:    taskDefinition.ContainerDefinitions,
-			Cpu:                     taskDefinition.Cpu,
-			ExecutionRoleArn:        taskDefinition.ExecutionRoleArn,
-			Family:                  taskDefinition.Family,
-			Memory:                  taskDefinition.Memory,
-			NetworkMode:             taskDefinition.NetworkMode,
-			RequiresCompatibilities: taskDefinition.RequiresCompatibilities,
-			TaskRoleArn:             taskDefinition.TaskRoleArn,
-		},
-	)
-
-	if err != nil {
-		console.ErrorExit(err, "Could not register ECS task definition")
-	}
-
-	return aws.StringValue(resp.TaskDefinition.TaskDefinitionArn)
+	return ecs.registerTaskDefinition(taskDefinition)
 }
 
+//GetEnvVarsFromTaskDefinition retrieves envvars from an existing task definition
 func (ecs *ECS) GetEnvVarsFromTaskDefinition(taskDefinitionArn string) []EnvVar {
 	var envVars []EnvVar
 
@@ -288,6 +260,7 @@ func (ecs *ECS) GetEnvVarsFromTaskDefinition(taskDefinitionArn string) []EnvVar 
 	return envVars
 }
 
+//UpdateTaskDefinitionCpuAndMemory registers a new task definition with the cpu/memory
 func (ecs *ECS) UpdateTaskDefinitionCpuAndMemory(taskDefinitionArn, cpu, memory string) string {
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
 
@@ -299,33 +272,70 @@ func (ecs *ECS) UpdateTaskDefinitionCpuAndMemory(taskDefinitionArn, cpu, memory 
 		taskDefinition.Memory = aws.String(memory)
 	}
 
-	resp, err := ecs.svc.RegisterTaskDefinition(
-		&awsecs.RegisterTaskDefinitionInput{
-			ContainerDefinitions:    taskDefinition.ContainerDefinitions,
-			Cpu:                     taskDefinition.Cpu,
-			ExecutionRoleArn:        taskDefinition.ExecutionRoleArn,
-			Family:                  taskDefinition.Family,
-			Memory:                  taskDefinition.Memory,
-			NetworkMode:             taskDefinition.NetworkMode,
-			RequiresCompatibilities: taskDefinition.RequiresCompatibilities,
-			TaskRoleArn:             taskDefinition.TaskRoleArn,
-		},
-	)
-
-	if err != nil {
-		console.ErrorExit(err, "Could not register ECS task definition")
-	}
-
-	return aws.StringValue(resp.TaskDefinition.TaskDefinitionArn)
+	return ecs.registerTaskDefinition(taskDefinition)
 }
 
-func (ecs *ECS) GetDeploymentId(taskDefinitionArn string) string {
+//GetRevisionNumber returns the revision number from a task definition
+func (ecs *ECS) GetRevisionNumber(taskDefinitionArn string) string {
 	contents := strings.Split(taskDefinitionArn, ":")
 	return contents[len(contents)-1]
 }
 
+//GetTaskDefinitionARN builds an ARN
+func (ecs *ECS) GetTaskDefinitionARN(region string, account string, family string, revisionNumber string) string {
+	return fmt.Sprintf("arn:aws:ecs:%s:%s:task-definition/%s:%s", region, account, family, revisionNumber)
+}
+
+//GetTaskFamily returns the task family from a task definition ARN
+func (ecs *ECS) GetTaskFamily(taskDefinitionArn string) string {
+	contents := strings.Split(taskDefinitionArn, ":")
+	return strings.TrimPrefix(contents[len(contents)-2], "task-definition/")
+}
+
+//GetCpuAndMemoryFromTaskDefinition returns the cpu/memory from a task definition
 func (ecs *ECS) GetCpuAndMemoryFromTaskDefinition(taskDefinitionArn string) (string, string) {
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
 
 	return aws.StringValue(taskDefinition.Cpu), aws.StringValue(taskDefinition.Memory)
+}
+
+//ResolveRevisionNumber returns a task defintion revision number by absolute value or expression
+func (ecs *ECS) ResolveRevisionNumber(taskDefinitionArn string, revisionExpression string) string {
+	currentRevision := ecs.GetRevisionNumber(taskDefinitionArn)
+	currentRevisionNumber, err := strconv.ParseInt(currentRevision, 10, 64)
+
+	if err != nil {
+		return ""
+	}
+
+	if revisionExpression == "" {
+		return currentRevision
+	}
+
+	var nextRevisionNumber int64
+
+	// if not a delta assume absolute
+	if revisionExpression[0] != '+' && revisionExpression[0] != '-' {
+		if _, err := strconv.ParseInt(revisionExpression, 10, 64); err != nil {
+			return ""
+		}
+
+		return revisionExpression
+	}
+
+	if s, err := strconv.ParseInt(revisionExpression[1:len(revisionExpression)], 10, 64); err == nil {
+		if revisionExpression[0] == '+' {
+			nextRevisionNumber = currentRevisionNumber + s
+		} else if revisionExpression[0] == '-' {
+			nextRevisionNumber = currentRevisionNumber - s
+		}
+	}
+
+	if nextRevisionNumber <= 0 {
+		return ""
+	}
+
+	result := strconv.FormatInt(nextRevisionNumber, 10)
+
+	return result
 }
