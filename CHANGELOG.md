@@ -1,3 +1,19 @@
+## 0.5.0 (2018-11-14)
+
+### Enhancements
+
+- Only deploy image with docker-compose.yml and --image-only flag ([#23](https://github.com/turnerlabs/fargate/pull/23))
+- Support for scheduled tasks - build ([#20](https://github.com/turnerlabs/fargate/issues/20))
+- Support for scheduled tasks - deploy ([#25](https://github.com/turnerlabs/fargate/issues/25))
+- implements task logs command ([#27](https://github.com/turnerlabs/fargate/pull/27))
+- adds --time and --no-prefix to service logs ([#29](https://github.com/turnerlabs/fargate/pull/29))
+- Deploy task definition revisions to services ([#28](https://github.com/turnerlabs/fargate/issues/28))
+
+### Bug Fixes
+
+- Fix output of env vars when service.TargetGroupArn is empty ([#22](https://github.com/turnerlabs/fargate/pull/22))
+
+
 ## 0.4.0 (2018-08-22)
 
 ### Enhancements
