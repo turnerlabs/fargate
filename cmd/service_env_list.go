@@ -31,6 +31,8 @@ func serviceEnvList(operation *ServiceEnvListOperation) {
 	service := ecs.DescribeService(operation.ServiceName)
 	envVars := ecs.GetEnvVarsFromTaskDefinition(service.TaskDefinitionArn)
 
+	ecs.SortEnvVars(envVars)
+
 	for _, envVar := range envVars {
 		fmt.Printf("%s=%s\n", envVar.Key, envVar.Value)
 	}

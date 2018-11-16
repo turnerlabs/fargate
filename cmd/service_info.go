@@ -118,6 +118,8 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 	if len(service.EnvVars) > 0 {
 		console.KeyValue("Environment Variables", "\n")
 
+		ecs.SortEnvVars(service.EnvVars)
+
 		for _, envVar := range service.EnvVars {
 			fmt.Printf("   %s=%s\n", envVar.Key, envVar.Value)
 		}
