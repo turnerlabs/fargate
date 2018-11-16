@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -31,6 +32,18 @@ type CreateTaskDefinitionInput struct {
 type EnvVar struct {
 	Key   string
 	Value string
+}
+
+type envSorter []EnvVar
+
+func (a envSorter) Len() int {
+	return len(a)
+}
+func (a envSorter) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+func (a envSorter) Less(i, j int) bool {
+	return a[i].Key < a[j].Key
 }
 
 func (ecs *ECS) CreateTaskDefinition(input *CreateTaskDefinitionInput) string {
@@ -338,4 +351,10 @@ func (ecs *ECS) ResolveRevisionNumber(taskDefinitionArn string, revisionExpressi
 	result := strconv.FormatInt(nextRevisionNumber, 10)
 
 	return result
+}
+
+// SortEnvVars sorts a slice of EnvVar's by Key
+func (ecs *ECS) SortEnvVars(envVars []EnvVar) []EnvVar {
+	sort.Sort(envSorter(envVars))
+	return envVars
 }

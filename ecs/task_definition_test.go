@@ -6,6 +6,36 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 )
 
+func TestSortEnvVars(t *testing.T) {
+	sess := session.Must(session.NewSession())
+	ecs := New(sess, "my-app-dev")
+
+	result := ecs.SortEnvVars([]EnvVar{
+		EnvVar{Key: "PORT", Value: "8080"},
+		EnvVar{Key: "ENVIRONMENT", Value: "prod"},
+		EnvVar{Key: "PRODUCT", Value: "my-app-prod"},
+		EnvVar{Key: "ENABLE_LOGGING", Value: "false"},
+		EnvVar{Key: "HEALTHCHECK", Value: "/hc"},
+	})
+
+	sorted := []EnvVar{
+		EnvVar{Key: "ENABLE_LOGGING", Value: "false"},
+		EnvVar{Key: "ENVIRONMENT", Value: "prod"},
+		EnvVar{Key: "HEALTHCHECK", Value: "/hc"},
+		EnvVar{Key: "PORT", Value: "8080"},
+		EnvVar{Key: "PRODUCT", Value: "my-app-prod"},
+	}
+
+	for i, env := range result {
+		expected := sorted[i].Key
+		got := env.Key
+
+		if got != expected {
+			t.Errorf("Expected %s, got %s", expected, got)
+		}
+	}
+}
+
 func TestGetTaskFamily(t *testing.T) {
 	var got, expected string
 
