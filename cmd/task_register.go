@@ -43,7 +43,12 @@ var taskRegisterCmd = &cobra.Command{
 		}
 
 		//valid cli arg combinations
-		nonComposeOptions := (flagTaskRegisterImage != "" || len(flagTaskRegisterEnvVars) > 0 || flagTaskRegisterEnvFile != "")
+		nonComposeOptions := (flagTaskRegisterImage != "" ||
+			len(flagTaskRegisterEnvVars) > 0 ||
+			flagTaskRegisterEnvFile != "" ||
+			len(flagTaskRegisterSecretVars) > 0 ||
+			flagTaskRegisterSecretFile != "")
+
 		if (flagTaskRegisterDockerComposeFile != "" && nonComposeOptions) ||
 			(flagTaskRegisterDockerComposeFile == "" && !nonComposeOptions) {
 			cmd.Help()
@@ -67,13 +72,13 @@ func init() {
 
 	taskRegisterCmd.Flags().StringArrayVarP(&flagTaskRegisterEnvVars, "env", "e", []string{}, "Environment variables to set [e.g. -e KEY=value -e KEY2=value]")
 
-	taskRegisterCmd.Flags().StringVarP(&flagTaskRegisterEnvFile, "env-file", "", "", "File containing list of environment variables to set, one per line, of the form KEY=value")
+	taskRegisterCmd.Flags().StringVar(&flagTaskRegisterEnvFile, "env-file", "", "File containing list of environment variables to set, one per line, of the form KEY=value")
 
 	taskRegisterCmd.Flags().StringVarP(&flagTaskRegisterDockerComposeFile, "file", "f", "", "Docker Compose file containing image and environment variables to register.")
 
 	taskRegisterCmd.Flags().StringArrayVar(&flagTaskRegisterSecretVars, "secret", []string{}, "Secret variables to set [e.g. --secret KEY=valueFrom --secret KEY2=valueFrom]")
 
-	taskRegisterCmd.Flags().StringVarP(&flagTaskRegisterSecretFile, "secret-file", "", "", "File containing list of secret variables to set, one per line, of the form KEY=valueFrom")
+	taskRegisterCmd.Flags().StringVar(&flagTaskRegisterSecretFile, "secret-file", "", "File containing list of secret variables to set, one per line, of the form KEY=valueFrom")
 
 	taskCmd.AddCommand(taskRegisterCmd)
 }
