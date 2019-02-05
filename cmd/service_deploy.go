@@ -112,7 +112,7 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) {
 		taskDefinitionArn = ecs.UpdateTaskDefinitionImage(ecsService.TaskDefinitionArn, dockerService.Image)
 	} else {
 		//register a new task definition based on the image and environment variables from the compose file
-		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, envvars, true)
+		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, envvars, true, ecsService.SecretVars)
 	}
 
 	//update service with new task definition

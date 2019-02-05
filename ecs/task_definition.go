@@ -25,6 +25,7 @@ type CreateTaskDefinitionInput struct {
 	Port             int64
 	LogGroupName     string
 	LogRegion        string
+	SecretVars       []EnvVar
 	TaskRole         string
 	Type             string
 }
@@ -64,6 +65,7 @@ func (ecs *ECS) CreateTaskDefinition(input *CreateTaskDefinitionInput) string {
 		Image:            aws.String(input.Image),
 		LogConfiguration: logConfiguration,
 		Name:             aws.String(input.Name),
+		Secrets:          input.Secrets(),
 	}
 
 	if input.Port != 0 {
@@ -104,6 +106,10 @@ func (input *CreateTaskDefinitionInput) Environment() []*awsecs.KeyValuePair {
 	return convertEnvVars(input.EnvVars)
 }
 
+func (input *CreateTaskDefinitionInput) Secrets() []*awsecs.Secret {
+	return convertSecretVars(input.SecretVars)
+}
+
 func convertEnvVars(envvars []EnvVar) []*awsecs.KeyValuePair {
 	var environment []*awsecs.KeyValuePair
 
@@ -118,6 +124,21 @@ func convertEnvVars(envvars []EnvVar) []*awsecs.KeyValuePair {
 
 	return environment
 
+}
+
+func convertSecretVars(envvars []EnvVar) []*awsecs.Secret {
+	var secrets []*awsecs.Secret
+
+	for _, envVar := range envvars {
+		secrets = append(secrets,
+			&awsecs.Secret{
+				Name:      aws.String(envVar.Key),
+				ValueFrom: aws.String(envVar.Value),
+			},
+		)
+	}
+
+	return secrets
 }
 
 func (ecs *ECS) DescribeTaskDefinition(taskDefinitionArn string) *awsecs.TaskDefinition {
@@ -150,7 +171,7 @@ func (ecs *ECS) UpdateTaskDefinitionImage(taskDefinitionArn, image string) strin
 // UpdateTaskDefinitionImageAndReplaceEnvVars creates a new, updated task definition
 // based on the specified image and env vars.
 // Note that any existing envvars are replaced by the new ones
-func (ecs *ECS) UpdateTaskDefinitionImageAndEnvVars(taskDefinitionArnOrFamily string, image string, environmentVariables []EnvVar, replaceEnvVars bool) string {
+func (ecs *ECS) UpdateTaskDefinitionImageAndEnvVars(taskDefinitionArnOrFamily string, image string, environmentVariables []EnvVar, replaceEnvVars bool, secretVariables []EnvVar) string {
 
 	//fetch task definition details (for specific or latest active)
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArnOrFamily)
@@ -175,6 +196,15 @@ func (ecs *ECS) UpdateTaskDefinitionImageAndEnvVars(taskDefinitionArnOrFamily st
 			for _, e := range envvars {
 				container.Environment = append(container.Environment, e)
 			}
+		}
+	}
+
+	//convert secrets to aws input format
+	if len(secretVariables) > 0 {
+		secrets := convertSecretVars(secretVariables)
+
+		for _, s := range secrets {
+			container.Secrets = append(container.Secrets, s)
 		}
 	}
 
@@ -206,7 +236,7 @@ func (ecs *ECS) registerTaskDefinition(taskDefinition *awsecs.TaskDefinition) st
 }
 
 //AddEnvVarsToTaskDefinition registers a new task definition with the envvars appended
-func (ecs *ECS) AddEnvVarsToTaskDefinition(taskDefinitionArn string, envVars []EnvVar) string {
+func (ecs *ECS) AddEnvVarsToTaskDefinition(taskDefinitionArn string, envVars []EnvVar, secretVars []EnvVar) string {
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
 
 	for _, envVar := range envVars {
@@ -221,16 +251,30 @@ func (ecs *ECS) AddEnvVarsToTaskDefinition(taskDefinitionArn string, envVars []E
 		)
 	}
 
+	for _, envVar := range secretVars {
+		secret := &awsecs.Secret{
+			Name:      aws.String(envVar.Key),
+			ValueFrom: aws.String(envVar.Value),
+		}
+
+		taskDefinition.ContainerDefinitions[0].Secrets = append(
+			taskDefinition.ContainerDefinitions[0].Secrets,
+			secret,
+		)
+	}
+
 	return ecs.registerTaskDefinition(taskDefinition)
 }
 
 //RemoveEnvVarsFromTaskDefinition registers a new task definition with the specified keys removed
 func (ecs *ECS) RemoveEnvVarsFromTaskDefinition(taskDefinitionArn string, keys []string) string {
 	var newEnvironment []*awsecs.KeyValuePair
+	var newSecrets []*awsecs.Secret
 
 	//look up task definition
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
 	environment := taskDefinition.ContainerDefinitions[0].Environment
+	secrets := taskDefinition.ContainerDefinitions[0].Secrets
 
 	//iterate existing envvars
 	for _, keyValuePair := range environment {
@@ -250,7 +294,26 @@ func (ecs *ECS) RemoveEnvVarsFromTaskDefinition(taskDefinitionArn string, keys [
 		}
 	}
 
+	//iterate existing secrets
+	for _, secret := range secrets {
+
+		//is this key a match to remove?
+		match := false
+		for _, key := range keys {
+			if aws.StringValue(secret.Name) == key {
+				match = true
+				break
+			}
+		}
+
+		//add this envvar since it wasn't a match to remove
+		if !match {
+			newSecrets = append(newSecrets, secret)
+		}
+	}
+
 	taskDefinition.ContainerDefinitions[0].Environment = newEnvironment
+	taskDefinition.ContainerDefinitions[0].Secrets = newSecrets
 
 	return ecs.registerTaskDefinition(taskDefinition)
 }
@@ -271,6 +334,24 @@ func (ecs *ECS) GetEnvVarsFromTaskDefinition(taskDefinitionArn string) []EnvVar 
 	}
 
 	return envVars
+}
+
+//GetSecretVarsFromTaskDefinition retrieves secret vars from an existing task definition
+func (ecs *ECS) GetSecretVarsFromTaskDefinition(taskDefinitionArn string) []EnvVar {
+	var secretVars []EnvVar
+
+	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
+
+	for _, keyValuePair := range taskDefinition.ContainerDefinitions[0].Secrets {
+		secretVars = append(secretVars,
+			EnvVar{
+				Key:   aws.StringValue(keyValuePair.Name),
+				Value: aws.StringValue(keyValuePair.ValueFrom),
+			},
+		)
+	}
+
+	return secretVars
 }
 
 //UpdateTaskDefinitionCpuAndMemory registers a new task definition with the cpu/memory
