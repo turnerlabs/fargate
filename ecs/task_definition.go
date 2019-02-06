@@ -141,6 +141,49 @@ func convertSecretVars(envvars []EnvVar) []*awsecs.Secret {
 	return secrets
 }
 
+func addVarsToEnvironment(currentVars []*awsecs.KeyValuePair, envVars []EnvVar) []*awsecs.KeyValuePair {
+	environment := convertEnvVars(envVars)
+
+	for _, curr := range currentVars {
+		key := aws.StringValue(curr.Name)
+		match := false
+
+		for _, sec := range environment {
+			if aws.StringValue(sec.Name) == key {
+				match = true
+				break
+			}
+		}
+
+		if !match {
+			environment = append(environment, curr)
+		}
+	}
+
+	return environment
+}
+
+func addVarsToSecrets(currentVars []*awsecs.Secret, envVars []EnvVar) []*awsecs.Secret {
+	secrets := convertSecretVars(envVars)
+
+	for _, curr := range currentVars {
+		key := aws.StringValue(curr.Name)
+		match := false
+		for _, sec := range secrets {
+			if aws.StringValue(sec.Name) == key {
+				match = true
+				break
+			}
+		}
+
+		if !match {
+			secrets = append(secrets, curr)
+		}
+	}
+
+	return secrets
+}
+
 func (ecs *ECS) DescribeTaskDefinition(taskDefinitionArn string) *awsecs.TaskDefinition {
 	if taskDefinitionCache[taskDefinitionArn] != nil {
 		return taskDefinitionCache[taskDefinitionArn]
@@ -239,28 +282,12 @@ func (ecs *ECS) registerTaskDefinition(taskDefinition *awsecs.TaskDefinition) st
 func (ecs *ECS) AddEnvVarsToTaskDefinition(taskDefinitionArn string, envVars []EnvVar, secretVars []EnvVar) string {
 	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
 
-	for _, envVar := range envVars {
-		keyValuePair := &awsecs.KeyValuePair{
-			Name:  aws.String(envVar.Key),
-			Value: aws.String(envVar.Value),
-		}
-
-		taskDefinition.ContainerDefinitions[0].Environment = append(
-			taskDefinition.ContainerDefinitions[0].Environment,
-			keyValuePair,
-		)
+	if len(envVars) > 0 {
+		taskDefinition.ContainerDefinitions[0].Environment = addVarsToEnvironment(taskDefinition.ContainerDefinitions[0].Environment, envVars)
 	}
 
-	for _, envVar := range secretVars {
-		secret := &awsecs.Secret{
-			Name:      aws.String(envVar.Key),
-			ValueFrom: aws.String(envVar.Value),
-		}
-
-		taskDefinition.ContainerDefinitions[0].Secrets = append(
-			taskDefinition.ContainerDefinitions[0].Secrets,
-			secret,
-		)
+	if len(secretVars) > 0 {
+		taskDefinition.ContainerDefinitions[0].Secrets = addVarsToSecrets(taskDefinition.ContainerDefinitions[0].Secrets, secretVars)
 	}
 
 	return ecs.registerTaskDefinition(taskDefinition)
