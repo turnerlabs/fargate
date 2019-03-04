@@ -88,28 +88,30 @@ func registerTask(op taskRegisterOperation) {
 	//are we registering from cli args or a compose file?
 	image := op.Image
 	var envvars []ECS.EnvVar
-	replaceEnvVars := false
+	var secrets []ECS.Secret
+	replaceVars := false
 
 	if op.ComposeFile != "" {
 		dockerService := getDockerServiceFromComposeFile(op.ComposeFile)
 		image = dockerService.Image
 		envvars = convertDockerComposeEnvVarsToECSEnvVars(dockerService)
-		replaceEnvVars = true
+		secrets = convertDockerComposeSecretsToECSSecrets(dockerService)
+		replaceVars = true
 
 	} else {
 		//read env file (if specified) and combine with other envvars
 		envvars = processEnvVarArgs(op.EnvVars, op.EnvFile)
 
-		//don't replace, just add, update where exists
-		replaceEnvVars = false
-	}
+		//read secrets file (if specified) and combine with other secret vars
+		secrets = processSecretVarArgs(op.SecretVars, op.SecretFile)
 
-	//read secrets file (if specified) and combine with other secret vars
-	secretVars := processEnvVarArgs(op.SecretVars, op.SecretFile)
+		//don't replace, just add, update where exists
+		replaceVars = false
+	}
 
 	//update and register new task definition
 	ecs := ECS.New(sess, op.Cluster)
-	newTD := ecs.UpdateTaskDefinitionImageAndEnvVars(op.Task, image, envvars, replaceEnvVars, secretVars)
+	newTD := ecs.UpdateTaskDefinitionImageAndEnvVars(op.Task, image, envvars, replaceVars, secrets)
 
 	//output new revision
 	fmt.Println(ecs.GetRevisionNumber(newTD))

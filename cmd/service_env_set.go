@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"bufio"
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
 	ECS "github.com/turnerlabs/fargate/ecs"
@@ -12,7 +9,7 @@ import (
 type ServiceEnvSetOperation struct {
 	ServiceName string
 	EnvVars     []ECS.EnvVar
-	SecretVars  []ECS.EnvVar
+	SecretVars  []ECS.Secret
 }
 
 func (o *ServiceEnvSetOperation) Validate() {
@@ -26,22 +23,31 @@ func (o *ServiceEnvSetOperation) SetEnvVars(inputEnvVars []string, envVarFile st
 }
 
 func (o *ServiceEnvSetOperation) SetSecretVars(inputSecretVars []string, secretVarFile string) {
-	o.SecretVars = processEnvVarArgs(inputSecretVars, secretVarFile)
+	o.SecretVars = processSecretVarArgs(inputSecretVars, secretVarFile)
 }
 
 func processEnvVarArgs(inputEnvVars []string, envVarFile string) []ECS.EnvVar {
 	if envVarFile != "" {
-		file, err := os.Open(envVarFile)
-		if err != nil {
-			return []ECS.EnvVar{}
-		}
-		defer file.Close()
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			inputEnvVars = append(inputEnvVars, scanner.Text())
-		}
+		inputEnvVars = append(inputEnvVars, readVarFile(envVarFile)...)
 	}
 	return extractEnvVars(inputEnvVars)
+}
+
+func processSecretVarArgs(inputSecretVars []string, secretVarFile string) []ECS.Secret {
+	var result []ECS.Secret
+
+	if secretVarFile != "" {
+		inputSecretVars = append(inputSecretVars, readVarFile(secretVarFile)...)
+	}
+
+	for _, envVar := range extractEnvVars(inputSecretVars) {
+		result = append(result, ECS.Secret{
+			Key:       envVar.Key,
+			ValueFrom: envVar.Value,
+		})
+	}
+
+	return result
 }
 
 var flagServiceEnvSetEnvVars []string
@@ -104,7 +110,7 @@ func serviceEnvSet(operation *ServiceEnvSetOperation) {
 		console.Info("Set %s secret variables:", operation.ServiceName)
 
 		for _, envVar := range operation.SecretVars {
-			console.Info("- %s=%s", envVar.Key, envVar.Value)
+			console.Info("- %s=%s", envVar.Key, envVar.ValueFrom)
 		}
 	}
 }

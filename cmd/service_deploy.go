@@ -104,10 +104,9 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) {
 	ecsService := ecs.DescribeService(operation.ServiceName)
 
 	dockerService := getDockerServiceFromComposeFile(operation.ComposeFile)
-	dockerSecrets := getDockerSecretsFromComposeFile(operation.ComposeFile)
 
 	envvars := convertDockerComposeEnvVarsToECSEnvVars(dockerService)
-	secrets := convertDockerComposeSecretsToECSEnvVars(dockerService, dockerSecrets)
+	secrets := convertDockerComposeSecretsToECSSecrets(dockerService)
 
 	//if --image-only flag is set, update image only
 	if flagServiceDeployDockerComposeImageOnly {
@@ -160,14 +159,6 @@ func getDockerServiceFromComposeFile(dockerComposeFile string) *dockercompose.Se
 	return dockerService
 }
 
-func getDockerSecretsFromComposeFile(dockerComposeFile string) map[string]*dockercompose.Secret {
-	//read the compose file configuration
-	composeFile := dockercompose.NewComposeFile(dockerComposeFile)
-	dockerCompose := composeFile.Config()
-
-	return dockerCompose.Secrets
-}
-
 func convertDockerComposeEnvVarsToECSEnvVars(service *dockercompose.Service) []ECS.EnvVar {
 	result := []ECS.EnvVar{}
 	for k, v := range service.Environment {
@@ -179,30 +170,13 @@ func convertDockerComposeEnvVarsToECSEnvVars(service *dockercompose.Service) []E
 	return result
 }
 
-func convertDockerComposeSecretsToECSEnvVars(service *dockercompose.Service, secrets map[string]*dockercompose.Secret) []ECS.EnvVar {
-	result := []ECS.EnvVar{}
-
-	for _, serviceSecret := range service.Secrets {
-		var key string
-
-		if serviceSecret.Target != "" {
-			key = serviceSecret.Target
-		} else if serviceSecret.Source != "" {
-			key = serviceSecret.Source
-		} else {
-			continue
-		}
-
-		for secretKey, secretValue := range secrets {
-			if secretKey == serviceSecret.Source {
-				result = append(result, ECS.EnvVar{
-					Key:   key,
-					Value: secretValue.Name,
-				})
-
-				break
-			}
-		}
+func convertDockerComposeSecretsToECSSecrets(service *dockercompose.Service) []ECS.Secret {
+	result := []ECS.Secret{}
+	for k, v := range service.Secrets {
+		result = append(result, ECS.Secret{
+			Key:       k,
+			ValueFrom: v,
+		})
 	}
 	return result
 }

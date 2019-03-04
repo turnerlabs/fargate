@@ -23,20 +23,6 @@ func NewComposeFile(file string) ComposeFile {
 // DockerCompose represents a docker-compose.yml file
 type DockerCompose struct {
 	Services map[string]*Service `yaml:"services"`
-	Secrets  map[string]*Secret  `yaml:"secrets,omitempty"`
-}
-
-// Secret represents a docker secret
-type Secret struct {
-	Name     string `yaml:"name,omitempty"`
-	External bool   `yaml:"external,omitempty"`
-	File     string `yaml:"file,omitempty"`
-}
-
-// ServiceSecret represents a docker service secret configuration
-type ServiceSecret struct {
-	Source string `yaml:"source"`
-	Target string `yaml:"target,omitempty"`
 }
 
 // Service represents a docker container
@@ -44,7 +30,7 @@ type Service struct {
 	Image       string            `yaml:"image,omitempty"`
 	Environment map[string]string `yaml:"environment,omitempty"`
 	Labels      map[string]string `yaml:"labels,omitempty"`
-	Secrets     []*ServiceSecret  `yaml:"secrets,omitempty"`
+	Secrets     map[string]string `yaml:"x-fargate-secrets,omitempty"`
 }
 
 //Config returns a DockerCompose representation of the file
