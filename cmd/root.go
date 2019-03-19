@@ -115,12 +115,8 @@ CloudWatch Logs, and Amazon Route 53 into an easy-to-use CLI.`,
 			}
 		}
 
-		for _, validRegion := range validRegions {
-			if region == validRegion {
-				break
-			}
-
-			console.IssueExit("Invalid region: %s [valid regions: %s]", region, strings.Join(validRegions, ", "))
+		if err := validateRegion(region); err != nil {
+			console.IssueExit(err.Error())
 		}
 
 		config := &aws.Config{
@@ -267,4 +263,18 @@ func validateCpuAndMemory(inputCpuUnits, inputMebibytes string) error {
 
 func validateMebibytes(mebibytes, min, max int64) bool {
 	return mebibytes >= min && mebibytes <= max && mebibytes%mebibytesInGibibyte == 0
+}
+
+func validateRegion(region string) error {
+	found := false
+	for _, validRegion := range validRegions {
+		if region == validRegion {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("Invalid region: %s [valid regions: %s]", region, strings.Join(validRegions, ", "))
+	}
+	return nil
 }
