@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"regexp"
@@ -207,6 +208,22 @@ func extractEnvVars(inputEnvVars []string) []ECS.EnvVar {
 	}
 
 	return envVars
+}
+
+func readVarFile(filename string) []string {
+	var result []string
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return result
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		result = append(result, scanner.Text())
+	}
+
+	return result
 }
 
 func validateCpuAndMemory(inputCpuUnits, inputMebibytes string) error {

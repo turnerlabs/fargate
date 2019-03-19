@@ -30,6 +30,7 @@ type Service struct {
 	Image       string            `yaml:"image,omitempty"`
 	Environment map[string]string `yaml:"environment,omitempty"`
 	Labels      map[string]string `yaml:"labels,omitempty"`
+	Secrets     map[string]string `yaml:"x-fargate-secrets,omitempty"`
 }
 
 //Config returns a DockerCompose representation of the file

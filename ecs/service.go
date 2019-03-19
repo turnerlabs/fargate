@@ -45,6 +45,7 @@ type Service struct {
 	TargetGroupArn    string
 	TaskDefinitionArn string
 	TaskRole          string
+	SecretVars        []EnvVar
 	SubnetIds         []string
 	Status            string
 }
@@ -253,6 +254,16 @@ func (ecs *ECS) DescribeServices(serviceArns []string) []Service {
 					EnvVar{
 						Key:   aws.StringValue(env.Name),
 						Value: aws.StringValue(env.Value),
+					},
+				)
+			}
+
+			for _, secret := range taskDefinition.ContainerDefinitions[0].Secrets {
+				s.SecretVars = append(
+					s.SecretVars,
+					EnvVar{
+						Key:   aws.StringValue(secret.Name),
+						Value: aws.StringValue(secret.ValueFrom),
 					},
 				)
 			}

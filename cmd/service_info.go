@@ -125,6 +125,16 @@ func getServiceInfo(operation *ServiceInfoOperation) {
 		}
 	}
 
+	if len(service.SecretVars) > 0 {
+		console.KeyValue("Secrets", "\n")
+
+		ecs.SortEnvVars(service.SecretVars)
+
+		for _, secret := range service.SecretVars {
+			fmt.Printf("   %s=%s\n", secret.Key, secret.Value)
+		}
+	}
+
 	if len(service.ServiceRegistries) > 0 {
 		console.Header("Service Discovery")
 
