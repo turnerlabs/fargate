@@ -70,3 +70,48 @@ func TestValidateCpuAndMemory(t *testing.T) {
 		}
 	}
 }
+
+func TestReadEnvFile(t *testing.T) {
+	expected := []string{"FOO=bar", "BAR=baz"}
+	results := readVarFile("./testdata/test.env")
+
+	if len(results) != len(expected) {
+		t.Errorf("Expected %d results, got %d results", len(expected), len(results))
+	}
+
+	for i, entry := range results {
+		if entry != expected[i] {
+			t.Errorf("Expected %s, got %s", expected[i], entry)
+		}
+	}
+}
+
+func TestReadEnvFileMissing(t *testing.T) {
+	results := readVarFile("missing.env")
+
+	if len(results) != 0 {
+		t.Errorf("Expected 0 results, got %d results", len(results))
+	}
+}
+
+func TestRegion(t *testing.T) {
+	region := "us-east-1"
+	err := validateRegion(region)
+	if err != nil {
+		t.Error(err)
+	}
+	region = "ap-south-1"
+	err = validateRegion(region)
+	if err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestRegion_Invalid(t *testing.T) {
+	region := "invalid"
+	err := validateRegion(region)
+	if err == nil {
+		t.Error("expecting invalid region")
+	}
+}

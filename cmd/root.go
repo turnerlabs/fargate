@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"regexp"
@@ -44,7 +45,21 @@ CPU (CPU Units)    Memory (MiB)
 4096               8192 through 30720 in 1GiB increments
 `)
 
-var validRegions = []string{"us-east-1"}
+var validRegions = []string{
+	"us-east-1",
+	"us-east-2",
+	"us-west-1",
+	"us-west-2",
+	"ca-central-1",
+	"eu-west-1",
+	"eu-west-2",
+	"eu-central-1",
+	"ap-southeast-1",
+	"ap-southeast-2",
+	"ap-northeast-1",
+	"ap-northheast-2",
+	"ap-south-1",
+}
 
 var (
 	clusterName string
@@ -100,12 +115,8 @@ CloudWatch Logs, and Amazon Route 53 into an easy-to-use CLI.`,
 			}
 		}
 
-		for _, validRegion := range validRegions {
-			if region == validRegion {
-				break
-			}
-
-			console.IssueExit("Invalid region: %s [valid regions: %s]", region, strings.Join(validRegions, ", "))
+		if err := validateRegion(region); err != nil {
+			console.IssueExit(err.Error())
 		}
 
 		config := &aws.Config{
@@ -195,6 +206,22 @@ func extractEnvVars(inputEnvVars []string) []ECS.EnvVar {
 	return envVars
 }
 
+func readVarFile(filename string) []string {
+	var result []string
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return result
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		result = append(result, scanner.Text())
+	}
+
+	return result
+}
+
 func validateCpuAndMemory(inputCpuUnits, inputMebibytes string) error {
 	cpuUnits, err := strconv.ParseInt(inputCpuUnits, 10, 16)
 
@@ -236,4 +263,18 @@ func validateCpuAndMemory(inputCpuUnits, inputMebibytes string) error {
 
 func validateMebibytes(mebibytes, min, max int64) bool {
 	return mebibytes >= min && mebibytes <= max && mebibytes%mebibytesInGibibyte == 0
+}
+
+func validateRegion(region string) error {
+	found := false
+	for _, validRegion := range validRegions {
+		if region == validRegion {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("Invalid region: %s [valid regions: %s]", region, strings.Join(validRegions, ", "))
+	}
+	return nil
 }

@@ -104,7 +104,9 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) {
 	ecsService := ecs.DescribeService(operation.ServiceName)
 
 	dockerService := getDockerServiceFromComposeFile(operation.ComposeFile)
+
 	envvars := convertDockerComposeEnvVarsToECSEnvVars(dockerService)
+	secrets := convertDockerComposeSecretsToECSSecrets(dockerService)
 
 	//if --image-only flag is set, update image only
 	if flagServiceDeployDockerComposeImageOnly {
@@ -112,7 +114,7 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) {
 		taskDefinitionArn = ecs.UpdateTaskDefinitionImage(ecsService.TaskDefinitionArn, dockerService.Image)
 	} else {
 		//register a new task definition based on the image and environment variables from the compose file
-		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, envvars, true)
+		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, envvars, true, secrets)
 	}
 
 	//update service with new task definition
@@ -163,6 +165,17 @@ func convertDockerComposeEnvVarsToECSEnvVars(service *dockercompose.Service) []E
 		result = append(result, ECS.EnvVar{
 			Key:   k,
 			Value: v,
+		})
+	}
+	return result
+}
+
+func convertDockerComposeSecretsToECSSecrets(service *dockercompose.Service) []ECS.Secret {
+	result := []ECS.Secret{}
+	for k, v := range service.Secrets {
+		result = append(result, ECS.Secret{
+			Key:       k,
+			ValueFrom: v,
 		})
 	}
 	return result
