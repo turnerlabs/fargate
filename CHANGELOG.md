@@ -1,3 +1,12 @@
+## 0.6.0 (2019-03-27)
+
+### Enhancements
+
+- Support for secrets in task definitions ([#41](https://github.com/turnerlabs/fargate/pull/41))
+- Support for all currently available regions ([#42](https://github.com/turnerlabs/fargate/pull/42))
+- Sort env vars output by key ([#33](https://github.com/turnerlabs/fargate/pull/33))
+
+
 ## 0.5.0 (2018-11-14)
 
 ### Enhancements
