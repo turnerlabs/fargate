@@ -460,6 +460,50 @@ func (mr *MockACMAPIMockRecorder) RemoveTagsFromCertificateRequest(arg0 interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveTagsFromCertificateRequest", reflect.TypeOf((*MockACMAPI)(nil).RemoveTagsFromCertificateRequest), arg0)
 }
 
+// RenewCertificate mocks base method
+func (m *MockACMAPI) RenewCertificate(arg0 *acm.RenewCertificateInput) (*acm.RenewCertificateOutput, error) {
+	ret := m.ctrl.Call(m, "RenewCertificate", arg0)
+	ret0, _ := ret[0].(*acm.RenewCertificateOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RenewCertificate indicates an expected call of RenewCertificate
+func (mr *MockACMAPIMockRecorder) RenewCertificate(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenewCertificate", reflect.TypeOf((*MockACMAPI)(nil).RenewCertificate), arg0)
+}
+
+// RenewCertificateWithContext mocks base method
+func (m *MockACMAPI) RenewCertificateWithContext(arg0 aws.Context, arg1 *acm.RenewCertificateInput, arg2 ...request.Option) (*acm.RenewCertificateOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RenewCertificateWithContext", varargs...)
+	ret0, _ := ret[0].(*acm.RenewCertificateOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RenewCertificateWithContext indicates an expected call of RenewCertificateWithContext
+func (mr *MockACMAPIMockRecorder) RenewCertificateWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenewCertificateWithContext", reflect.TypeOf((*MockACMAPI)(nil).RenewCertificateWithContext), varargs...)
+}
+
+// RenewCertificateRequest mocks base method
+func (m *MockACMAPI) RenewCertificateRequest(arg0 *acm.RenewCertificateInput) (*request.Request, *acm.RenewCertificateOutput) {
+	ret := m.ctrl.Call(m, "RenewCertificateRequest", arg0)
+	ret0, _ := ret[0].(*request.Request)
+	ret1, _ := ret[1].(*acm.RenewCertificateOutput)
+	return ret0, ret1
+}
+
+// RenewCertificateRequest indicates an expected call of RenewCertificateRequest
+func (mr *MockACMAPIMockRecorder) RenewCertificateRequest(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenewCertificateRequest", reflect.TypeOf((*MockACMAPI)(nil).RenewCertificateRequest), arg0)
+}
+
 // RequestCertificate mocks base method
 func (m *MockACMAPI) RequestCertificate(arg0 *acm.RequestCertificateInput) (*acm.RequestCertificateOutput, error) {
 	ret := m.ctrl.Call(m, "RequestCertificate", arg0)
