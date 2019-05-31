@@ -197,7 +197,8 @@ func addVarsToSecrets(currentVars []*awsecs.Secret, secretVars []Secret) []*awse
 	return secrets
 }
 
-//DescribeTaskDefinition fetches a task definition from cache or aws
+//DescribeTaskDefinition fetches a task definition output from cache or aws 
+//(includes the taskdefinition itself along with its tags)
 func (ecs *ECS) DescribeTaskDefinition(taskDefinitionArn string) *awsecs.DescribeTaskDefinitionOutput {
 	if taskDefinitionCache[taskDefinitionArn] != nil {
 		return taskDefinitionCache[taskDefinitionArn]
@@ -222,9 +223,9 @@ func (ecs *ECS) DescribeTaskDefinition(taskDefinitionArn string) *awsecs.Describ
 
 //UpdateTaskDefinitionImage registers a new task definition with the updated image
 func (ecs *ECS) UpdateTaskDefinitionImage(taskDefinitionArn, image string) string {
-	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
-	taskDefinition.TaskDefinition.ContainerDefinitions[0].Image = aws.String(image)
-	return ecs.registerTaskDefinition(taskDefinition)
+	dtd := ecs.DescribeTaskDefinition(taskDefinitionArn)
+	dtd.TaskDefinition.ContainerDefinitions[0].Image = aws.String(image)
+	return ecs.registerTaskDefinition(dtd)
 }
 
 //UpdateTaskDefinitionImageAndEnvVars creates a new, updated task definition
@@ -233,10 +234,10 @@ func (ecs *ECS) UpdateTaskDefinitionImage(taskDefinitionArn, image string) strin
 func (ecs *ECS) UpdateTaskDefinitionImageAndEnvVars(taskDefinitionArnOrFamily string, image string, environmentVariables []EnvVar, replaceVars bool, secretVariables []Secret) string {
 
 	//fetch task definition details (for specific or latest active)
-	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArnOrFamily)
+	dtd := ecs.DescribeTaskDefinition(taskDefinitionArnOrFamily)
 
 	//which container are we updating?
-	container := taskDefinition.TaskDefinition.ContainerDefinitions[0]
+	container := dtd.TaskDefinition.ContainerDefinitions[0]
 
 	//update image if specified
 	if image != "" {
@@ -271,25 +272,27 @@ func (ecs *ECS) UpdateTaskDefinitionImageAndEnvVars(taskDefinitionArnOrFamily st
 		}
 	}
 
-	return ecs.registerTaskDefinition(taskDefinition)
+	return ecs.registerTaskDefinition(dtd)
 }
 
-//registers a new task definition based on a task definition struct
-func (ecs *ECS) registerTaskDefinition(taskDefinition *awsecs.DescribeTaskDefinitionOutput) string {
+//registers a new task definition based on a task definition output struct
+//which includes tags
+func (ecs *ECS) registerTaskDefinition(dtd *awsecs.DescribeTaskDefinitionOutput) string {
 
 	input := &awsecs.RegisterTaskDefinitionInput{
-		ContainerDefinitions:    taskDefinition.TaskDefinition.ContainerDefinitions,
-		Cpu:                     taskDefinition.TaskDefinition.Cpu,
-		ExecutionRoleArn:        taskDefinition.TaskDefinition.ExecutionRoleArn,
-		Family:                  taskDefinition.TaskDefinition.Family,
-		Memory:                  taskDefinition.TaskDefinition.Memory,
-		NetworkMode:             taskDefinition.TaskDefinition.NetworkMode,
-		RequiresCompatibilities: taskDefinition.TaskDefinition.RequiresCompatibilities,
-		TaskRoleArn:             taskDefinition.TaskDefinition.TaskRoleArn,
+		ContainerDefinitions:    dtd.TaskDefinition.ContainerDefinitions,
+		Cpu:                     dtd.TaskDefinition.Cpu,
+		ExecutionRoleArn:        dtd.TaskDefinition.ExecutionRoleArn,
+		Family:                  dtd.TaskDefinition.Family,
+		Memory:                  dtd.TaskDefinition.Memory,
+		NetworkMode:             dtd.TaskDefinition.NetworkMode,
+		RequiresCompatibilities: dtd.TaskDefinition.RequiresCompatibilities,
+		TaskRoleArn:             dtd.TaskDefinition.TaskRoleArn,
 	}
 
-	if len(taskDefinition.Tags) > 0 {
-		input.Tags = taskDefinition.Tags
+	//it's unfortunate that the tags aren't included in the task definition itself :(
+	if len(dtd.Tags) > 0 {
+		input.Tags = dtd.Tags
 	}
 
 	//register a new task definition
@@ -303,17 +306,17 @@ func (ecs *ECS) registerTaskDefinition(taskDefinition *awsecs.DescribeTaskDefini
 
 //AddEnvVarsToTaskDefinition registers a new task definition with the envvars appended
 func (ecs *ECS) AddEnvVarsToTaskDefinition(taskDefinitionArn string, envVars []EnvVar, secretVars []Secret) string {
-	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
+	dtd := ecs.DescribeTaskDefinition(taskDefinitionArn)
 
 	if len(envVars) > 0 {
-		taskDefinition.TaskDefinition.ContainerDefinitions[0].Environment = addVarsToEnvironment(taskDefinition.TaskDefinition.ContainerDefinitions[0].Environment, envVars)
+		dtd.TaskDefinition.ContainerDefinitions[0].Environment = addVarsToEnvironment(dtd.TaskDefinition.ContainerDefinitions[0].Environment, envVars)
 	}
 
 	if len(secretVars) > 0 {
-		taskDefinition.TaskDefinition.ContainerDefinitions[0].Secrets = addVarsToSecrets(taskDefinition.TaskDefinition.ContainerDefinitions[0].Secrets, secretVars)
+		dtd.TaskDefinition.ContainerDefinitions[0].Secrets = addVarsToSecrets(dtd.TaskDefinition.ContainerDefinitions[0].Secrets, secretVars)
 	}
 
-	return ecs.registerTaskDefinition(taskDefinition)
+	return ecs.registerTaskDefinition(dtd)
 }
 
 //RemoveEnvVarsFromTaskDefinition registers a new task definition with the specified keys removed
@@ -322,9 +325,9 @@ func (ecs *ECS) RemoveEnvVarsFromTaskDefinition(taskDefinitionArn string, keys [
 	var newSecrets []*awsecs.Secret
 
 	//look up task definition
-	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
-	environment := taskDefinition.TaskDefinition.ContainerDefinitions[0].Environment
-	secrets := taskDefinition.TaskDefinition.ContainerDefinitions[0].Secrets
+	dtd := ecs.DescribeTaskDefinition(taskDefinitionArn)
+	environment := dtd.TaskDefinition.ContainerDefinitions[0].Environment
+	secrets := dtd.TaskDefinition.ContainerDefinitions[0].Secrets
 
 	//iterate existing envvars
 	for _, keyValuePair := range environment {
@@ -362,10 +365,10 @@ func (ecs *ECS) RemoveEnvVarsFromTaskDefinition(taskDefinitionArn string, keys [
 		}
 	}
 
-	taskDefinition.TaskDefinition.ContainerDefinitions[0].Environment = newEnvironment
-	taskDefinition.TaskDefinition.ContainerDefinitions[0].Secrets = newSecrets
+	dtd.TaskDefinition.ContainerDefinitions[0].Environment = newEnvironment
+	dtd.TaskDefinition.ContainerDefinitions[0].Secrets = newSecrets
 
-	return ecs.registerTaskDefinition(taskDefinition)
+	return ecs.registerTaskDefinition(dtd)
 }
 
 //GetEnvVarsFromTaskDefinition retrieves envvars from an existing task definition
@@ -406,17 +409,17 @@ func (ecs *ECS) GetSecretVarsFromTaskDefinition(taskDefinitionArn string) []EnvV
 
 //UpdateTaskDefinitionCpuAndMemory registers a new task definition with the cpu/memory
 func (ecs *ECS) UpdateTaskDefinitionCpuAndMemory(taskDefinitionArn, cpu, memory string) string {
-	taskDefinition := ecs.DescribeTaskDefinition(taskDefinitionArn)
+	dtd := ecs.DescribeTaskDefinition(taskDefinitionArn)
 
 	if cpu != "" {
-		taskDefinition.TaskDefinition.Cpu = aws.String(cpu)
+		dtd.TaskDefinition.Cpu = aws.String(cpu)
 	}
 
 	if memory != "" {
-		taskDefinition.TaskDefinition.Memory = aws.String(memory)
+		dtd.TaskDefinition.Memory = aws.String(memory)
 	}
 
-	return ecs.registerTaskDefinition(taskDefinition)
+	return ecs.registerTaskDefinition(dtd)
 }
 
 //GetRevisionNumber returns the revision number from a task definition
