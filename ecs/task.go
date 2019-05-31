@@ -201,7 +201,7 @@ func (ecs *ECS) DescribeTasks(taskIds []string) []Task {
 	for _, t := range resp.Tasks {
 		taskArn := aws.StringValue(t.TaskArn)
 		contents := strings.Split(taskArn, "/")
-		taskId := contents[len(contents)-1]
+		taskID := contents[len(contents)-1]
 
 		task := Task{
 			Cpu:           aws.StringValue(t.Cpu),
@@ -210,15 +210,15 @@ func (ecs *ECS) DescribeTasks(taskIds []string) []Task {
 			DesiredStatus: aws.StringValue(t.DesiredStatus),
 			LastStatus:    aws.StringValue(t.LastStatus),
 			Memory:        aws.StringValue(t.Memory),
-			TaskId:        taskId,
+			TaskId:        taskID,
 			StartedBy:     aws.StringValue(t.StartedBy),
 		}
 
 		taskDefinition := ecs.DescribeTaskDefinition(aws.StringValue(t.TaskDefinitionArn))
-		task.Image = aws.StringValue(taskDefinition.ContainerDefinitions[0].Image)
-		task.TaskRole = aws.StringValue(taskDefinition.TaskRoleArn)
+		task.Image = aws.StringValue(taskDefinition.TaskDefinition.ContainerDefinitions[0].Image)
+		task.TaskRole = aws.StringValue(taskDefinition.TaskDefinition.TaskRoleArn)
 
-		for _, environment := range taskDefinition.ContainerDefinitions[0].Environment {
+		for _, environment := range taskDefinition.TaskDefinition.ContainerDefinitions[0].Environment {
 			task.EnvVars = append(
 				task.EnvVars,
 				EnvVar{
