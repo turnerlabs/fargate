@@ -367,7 +367,7 @@ If the docker compose file defines more than one container, you can use the [lab
 fargate task generate [--file docker-compose.yml]
 ```
 
-The generate command converts a [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) into a [Docker Compose File](https://docs.docker.com/compose/overview/).  The Docker image, environment variables, and secrets are the targeted elements.
+The generate command converts a [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) into a [Docker Compose File](https://docs.docker.com/compose/overview/).  The Docker image, environment variables, secrets, and target port are the mapped elements.
 
 You can specify the task definition family by using a `fargate.yml` file or using 
 the `-t` flag, including an optional revision number.
@@ -385,7 +385,7 @@ services:
   app:
     image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-app:1.0
     ports:
-    - published: 80
+    - published: 8080
       target: 8080
     environment:
       AWS_REGION: us-east-1

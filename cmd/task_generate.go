@@ -54,7 +54,7 @@ func generate(cmd *cobra.Command, args []string) {
 	//ports
 	for _, p := range container.PortMappings {
 		service.Ports = append(service.Ports, dockercompose.Port{
-			Published: 80,
+			Published: *p.ContainerPort,
 			Target:    *p.ContainerPort,
 		})
 	}
