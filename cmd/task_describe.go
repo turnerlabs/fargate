@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
@@ -10,31 +9,27 @@ import (
 	ECS "github.com/turnerlabs/fargate/ecs"
 )
 
-var flagTaskGenerateDockerComposeFile string
-
-var taskGenerateCmd = &cobra.Command{
-	Use:   "generate",
-	Short: "Generate a docker compose file based on a task definition",
-	Run:   generate,
+var taskDescribeCmd = &cobra.Command{
+	Use:   "describe",
+	Short: "Describe a task definition in docker compose format",
+	Run:   describe,
 	Example: `
 # with a fargate.yml present	
-fargate task generate
+fargate task describe
 
-# specify task definition family, and compose file
-fargate task generate -t task -f docker-compose.yml
+# specify task definition family
+fargate task describe -t my-app
 
 # specify specific task definition family with revision
-fargate task generate -t my-app:42
+fargate task describe -t my-app:42
 `,
 }
 
 func init() {
-	taskGenerateCmd.Flags().StringVarP(&flagTaskGenerateDockerComposeFile, "file", "f", "docker-compose.yml", "Ouptut Docker Compose file")
-
-	taskCmd.AddCommand(taskGenerateCmd)
+	taskCmd.AddCommand(taskDescribeCmd)
 }
 
-func generate(cmd *cobra.Command, args []string) {
+func describe(cmd *cobra.Command, args []string) {
 	ecs := ECS.New(sess, "")
 
 	//lookup latest/active task definition from family
@@ -45,7 +40,7 @@ func generate(cmd *cobra.Command, args []string) {
 	container := td.ContainerDefinitions[0]
 
 	//initialize a new compose file
-	composeFile := dockercompose.New(flagTaskGenerateDockerComposeFile)
+	composeFile := dockercompose.New("")
 
 	//add service for the 1st container
 	service := composeFile.AddService(*container.Name)
@@ -72,15 +67,10 @@ func generate(cmd *cobra.Command, args []string) {
 	//indicate that this container should be deployed
 	service.Labels[deployDockerComposeLabel] = "1"
 
-	//write object to file
-	yes := true
-	if _, err := os.Stat(composeFile.File); err == nil {
-		fmt.Print(composeFile.File + " already exists. Overwrite? ")
-		yes = askForConfirmation()
+	yaml, err := composeFile.Yaml()
+	if err != nil {
+		console.IssueExit("marshalling error: ", err)
 	}
-	if yes {
-		composeFile.Write()
-		fmt.Println("wrote", composeFile.File)
-	}
-	fmt.Println("done")
+
+	fmt.Println(string(yaml))
 }

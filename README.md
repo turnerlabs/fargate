@@ -328,7 +328,7 @@ until you manually stop them either through AWS APIs, the AWS Management
 Console, or until they are interrupted for any reason.
 
 - [register](#fargate-task-register)
-- [generate](#fargate-task-generate)
+- [describe](#fargate-task-describe)
 - [logs](#fargate-task-logs)
 
 
@@ -361,23 +361,30 @@ Secrets can be defined as key-value pairs under the docker compose file extensio
 If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy.
 
 
-##### fargate task generate
+##### fargate task describe
 
 ```console
-fargate task generate [--file docker-compose.yml]
+fargate task describe
 ```
 
-The generate command converts a [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) into a [Docker Compose File](https://docs.docker.com/compose/overview/).  The Docker image, environment variables, secrets, and target port are the mapped elements.
+The describe command describes a [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) in [Docker Compose](https://docs.docker.com/compose/overview/) format. The Docker image, environment variables, secrets, and target port are the mapped elements.
 
-You can specify the task definition family by using a `fargate.yml` file or using 
+This command can be useful for looking at changes made by the `task register`, `service deploy`, or `fargate service env set` commands.  It can also be useful for running a task definition locally for debugging or troubleshooting purposes.
+
+```sh
+fargate task describe -t my-app > docker-compose.yml
+docker-compose up
+```
+
+You can specify the task definition family by using a `fargate.yml` file, the `FARGATE_TASK` envvar, or using 
 the `-t` flag, including an optional revision number.
 
-```
-fargate task generate -t my-app
-fargate task generate -t my-app:42
+```sh
+fargate task describe -t my-app
+fargate task describe -t my-app:42
 ```
 
-An example of an outputted `docker-compose.yml` file:
+Example output:
 
 ```yaml
 version: "3.7"
