@@ -369,7 +369,7 @@ fargate task describe
 
 The describe command describes a [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) in [Docker Compose](https://docs.docker.com/compose/overview/) format. The Docker image, environment variables, secrets, and target port are the mapped elements.
 
-This command can be useful for looking at changes made by the `task register`, `service deploy`, or `fargate service env set` commands.  It can also be useful for running a task definition locally for debugging or troubleshooting purposes.
+This command can be useful for looking at changes made by the `task register`, `service deploy`, or `service env set` commands.  It can also be useful for running a task definition locally for debugging or troubleshooting purposes.
 
 ```sh
 fargate task describe -t my-app > docker-compose.yml
