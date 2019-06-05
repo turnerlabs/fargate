@@ -134,12 +134,12 @@ Deploy image, environment variables, and secrets defined in a [docker compose fi
 
 Deploy a docker [image](https://docs.docker.com/compose/compose-file/#image) and [environment variables](https://docs.docker.com/compose/environment-variables/) defined in a docker compose file together as a single unit. Note that environments variables and secrets are replaced with what's in the compose file.
 
-Secrets can be defined as key-value pairs under the docker compose file extension field `x-fargate-secrets`. To use extension fields, the compose file version must be  at least `2.1` for the 2.x series or at least `3.4` for the 3.x series.
+Secrets can be defined as key-value pairs under the docker compose file extension field `x-fargate-secrets`. To use extension fields, the compose file version must be  at least `2.4` for the 2.x series or at least `3.7` for the 3.x series.
 
 This allows you to run `docker-compose up` locally to run your app the same way it will run in AWS. Note that while the docker-compose yaml configuration supports numerous options, only the image and environment variables are deployed to fargate. If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy. For example:
 
 ```yaml
-version: '3.4'
+version: "3.7"
 services:
   web:
     build: .
@@ -328,21 +328,26 @@ until you manually stop them either through AWS APIs, the AWS Management
 Console, or until they are interrupted for any reason.
 
 - [register](#fargate-task-register)
+- [describe](#fargate-task-describe)
 - [logs](#fargate-task-logs)
 
 
 ##### fargate task register
 
 ```console
-fargate task register [--image <docker-image>] [-e KEY=value -e KEY2=value] 
-                      [--env-file dev.env] [--secret KEY3=valueFrom] 
-                      [--secret-file secrets.env]
+fargate task register [--image <docker-image>] 
+                      [-e KEY=value -e KEY2=value] [--env-file dev.env]
+                      [--secret KEY3=valueFrom] [--secret-file secrets.env]
 ```
 
-Registers a new [task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) for the specified docker image or environment variables based on the latest revision of the task family and returns the new revision number.
+Registers a new [task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) for the specified docker image, environment variables, or secrets based on the latest revision of the task family and returns the new revision number.
 
 The Docker container image to use in the new Task Definition can be specified
 via the --image flag.
+
+The environment variables can be specified using one or many `--env` flags or the `--env-file` flag.
+
+The secrets can be specified using one or many `--secret` flags or the `--secret-file` flag.
 
 
 ```console
@@ -351,9 +356,54 @@ fargate task register [--file docker-compose.yml]
 
 Registers a new [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) using the [image](https://docs.docker.com/compose/compose-file/#image), [environment variables](https://docs.docker.com/compose/environment-variables/), and secrets defined in a docker compose file. Note that environments variables are replaced with what's in the compose file.
 
-Secrets can be defined as key-value pairs under the docker compose file extension field `x-fargate-secrets`. To use extension fields, the compose file version must be  at least `2.1` for the 2.x series or at least `3.4` for the 3.x series.
+Secrets can be defined as key-value pairs under the docker compose file extension field `x-fargate-secrets`. To use extension fields, the compose file version must be  at least `2.4` for the 2.x series or at least `3.7` for the 3.x series.
 
 If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy.
+
+
+##### fargate task describe
+
+```console
+fargate task describe
+```
+
+The describe command describes a [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) in [Docker Compose](https://docs.docker.com/compose/overview/) format. The Docker image, environment variables, secrets, and target port are the mapped elements.
+
+This command can be useful for looking at changes made by the `task register`, `service deploy`, or `service env set` commands.  It can also be useful for running a task definition locally for debugging or troubleshooting purposes.
+
+```sh
+fargate task describe -t my-app > docker-compose.yml
+docker-compose up
+```
+
+You can specify the task definition family by using a `fargate.yml` file, the `FARGATE_TASK` envvar, or using 
+the `-t` flag, including an optional revision number.
+
+```sh
+fargate task describe -t my-app
+fargate task describe -t my-app:42
+```
+
+Example output:
+
+```yaml
+version: "3.7"
+services:
+  app:
+    image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-app:1.0
+    ports:
+    - published: 8080
+      target: 8080
+    environment:
+      AWS_REGION: us-east-1
+      ENVIRONMENT: dev
+      FOO: bar
+    x-fargate-secrets:
+      KEY: arn:key:ssm:us-east-1:000000000000:parameter/path/to/my_parameter      
+    labels:
+      aws.ecs.fargate.deploy: "1"
+```
+
 
 ##### fargate task logs
 
