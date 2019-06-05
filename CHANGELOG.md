@@ -1,3 +1,11 @@
+## 0.7.0 (2019-06-05)
+
+### Enhancements
+
+- Propagate tags when creating new task definitions ([#35](https://github.com/turnerlabs/fargate/issues/35))
+- Adds describe command that describes a task definition in docker compose format ([#42](https://github.com/turnerlabs/fargate/pull/47))
+
+
 ## 0.6.0 (2019-03-27)
 
 ### Enhancements
