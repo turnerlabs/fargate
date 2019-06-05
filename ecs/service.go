@@ -223,7 +223,7 @@ func (ecs *ECS) DescribeServices(serviceArns []string) []Service {
 			TaskDefinitionArn: aws.StringValue(service.TaskDefinition),
 		}
 
-		taskDefinition := ecs.DescribeTaskDefinition(aws.StringValue(service.TaskDefinition))
+		taskDefinition := ecs.DescribeTaskDefinition(aws.StringValue(service.TaskDefinition)).TaskDefinition
 
 		s.Cpu = aws.StringValue(taskDefinition.Cpu)
 		s.Memory = aws.StringValue(taskDefinition.Memory)
@@ -288,7 +288,7 @@ func (ecs *ECS) DescribeServices(serviceArns []string) []Service {
 				Id:           ecs.GetRevisionNumber(aws.StringValue(d.TaskDefinition)),
 			}
 
-			deploymentTaskDefinition := ecs.DescribeTaskDefinition(aws.StringValue(d.TaskDefinition))
+			deploymentTaskDefinition := ecs.DescribeTaskDefinition(aws.StringValue(d.TaskDefinition)).TaskDefinition
 			deployment.Image = aws.StringValue(deploymentTaskDefinition.ContainerDefinitions[0].Image)
 
 			s.AddDeployment(deployment)

@@ -4,8 +4,8 @@
 [[projects]]
   name = "github.com/aws/aws-sdk-go"
   packages = ["aws","aws/awserr","aws/awsutil","aws/client","aws/client/metadata","aws/corehandlers","aws/credentials","aws/credentials/ec2rolecreds","aws/credentials/endpointcreds","aws/credentials/processcreds","aws/credentials/stscreds","aws/csm","aws/defaults","aws/ec2metadata","aws/endpoints","aws/request","aws/session","aws/signer/v4","internal/ini","internal/sdkio","internal/sdkrand","internal/sdkuri","internal/shareddefaults","private/protocol","private/protocol/ec2query","private/protocol/json/jsonutil","private/protocol/jsonrpc","private/protocol/query","private/protocol/query/queryutil","private/protocol/rest","private/protocol/xml/xmlutil","service/acm","service/acm/acmiface","service/cloudwatchevents","service/cloudwatchlogs","service/ec2","service/ec2/ec2iface","service/ecs","service/elbv2","service/elbv2/elbv2iface","service/servicediscovery","service/sts"]
-  revision = "c1afd6c3340feedd0a2c1cd929dcb291d4bd09ba"
-  version = "v1.16.23"
+  revision = "1badbda38516ecb9e6157b85064bf7058ca9f0dc"
+  version = "v1.19.40"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -19,10 +19,10 @@
   revision = "b3e60bcdc577185fce3cf625fc96b62857ce5574"
 
 [[projects]]
+  branch = "master"
   name = "github.com/hashicorp/golang-lru"
   packages = [".","simplelru"]
-  revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
-  version = "v0.5.0"
+  revision = "59383c442f7d7b190497e9bb8fc17a48d06cd03f"
 
 [[projects]]
   name = "github.com/hashicorp/hcl"
@@ -151,6 +151,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7cf65c122c3d47f444111108634964ee3e6d0054c7bd0ccc6ec0f9de4a06edf6"
+  inputs-digest = "d17827d63fdc89e12a64aef387ea2350f2d2c474b5c48f7e24b526e872da7c40"
   solver-name = "gps-cdcl"
   solver-version = 1

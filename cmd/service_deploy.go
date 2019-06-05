@@ -147,11 +147,10 @@ func deployRevision(operation *ServiceDeployOperation) {
 
 func getDockerServiceFromComposeFile(dockerComposeFile string) *dockercompose.Service {
 	//read the compose file configuration
-	composeFile := dockercompose.NewComposeFile(dockerComposeFile)
-	dockerCompose := composeFile.Config()
+	composeFile := dockercompose.Read(dockerComposeFile)
 
 	//determine which docker-compose service/container to deploy
-	_, dockerService := getDockerServiceToDeploy(dockerCompose)
+	_, dockerService := getDockerServiceToDeploy(&composeFile.Data)
 	if dockerService == nil {
 		console.IssueExit(`Please indicate which docker container you'd like to deploy using the label "%s: 1"`, deployDockerComposeLabel)
 	}

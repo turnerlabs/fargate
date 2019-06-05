@@ -1,6 +1,6 @@
 [[constraint]]
   name = "github.com/aws/aws-sdk-go"
-  version = "1.15.77"
+  version = "1.19.37"
 
 [[constraint]]
   name = "github.com/golang/mock"
