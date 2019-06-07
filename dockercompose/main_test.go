@@ -27,7 +27,7 @@ const (
 
 // 2
 func TestComposeV2(t *testing.T) {
-	f := doTest(t, "./v2.yml")
+	f := doTest(t, "v2.yml")
 	svc := f.Data.Services["web"]
 	if svc.Image != image {
 		t.Error("expecting image")
