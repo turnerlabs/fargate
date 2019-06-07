@@ -64,9 +64,27 @@ func TestComposeV24(t *testing.T) {
 	}
 }
 
-// 3.2
-func TestComposeV32(t *testing.T) {
-	f := doTest(t, "v3.2.yml")
+// 3.2 short
+func TestComposeV32Short(t *testing.T) {
+	f := doTest(t, "v3.2-short.yml")
+	svc := f.Data.Services["web"]
+	if svc.Image != image {
+		t.Error("expecting image")
+	}
+	if svc.Ports[0].Published != publishedPort {
+		t.Error("expecting published port")
+	}
+	if svc.Ports[0].Target != targetPort {
+		t.Error("expecting published port")
+	}
+	if svc.Labels[labelKey] != labelValue {
+		t.Error("expecting label")
+	}
+}
+
+// 3.2 long
+func TestComposeV32Long(t *testing.T) {
+	f := doTest(t, "v3.2-long.yml")
 	svc := f.Data.Services["web"]
 	if svc.Image != image {
 		t.Error("expecting image")
