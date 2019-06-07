@@ -121,7 +121,7 @@ services:
     image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0
     ports:
     - published: 80
-      target: 8080
+    - target: 8080
     environment:
       FOO: bar
     labels:

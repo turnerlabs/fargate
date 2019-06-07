@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.2"
 services:
   web:
     build: .
@@ -7,7 +7,5 @@ services:
     - "80:8080"
     environment:
       FOO: bar
-    x-fargate-secrets:
-      QUX: arn:key:ssm:us-east-1:000000000000:parameter/path/to/my_parameter
     labels:
       aws.ecs.fargate.deploy: 1
