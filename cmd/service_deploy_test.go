@@ -12,14 +12,13 @@ func TestGetDockerServiceToDeploy_Happy(t *testing.T) {
 
 	//create a docker-compose.yml representation
 	yml := `
-version: '3'
+version: "2"
 services:
   web:
     build: .
     image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0
     ports:
-    - published: 80
-      target: 8080
+    - "80:8080"
     environment:
       FOO: bar
 `
@@ -45,14 +44,13 @@ func TestGetDockerServiceToDeploy_Two(t *testing.T) {
 
 	//create a docker-compose.yml representation
 	yml := `
-version: '3'
+version: "2"
 services:
   web:
     build: .
     image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0
     ports:
-    - published: 80
-      target: 8080
+    - "80:8080"
     environment:
       FOO: bar
     labels:
@@ -82,14 +80,13 @@ func TestGetDockerServiceToDeploy_NoLabel(t *testing.T) {
 
 	//create a docker-compose.yml representation
 	yml := `
-version: '3'
+version: "2"
 services:
   web:
     build: .
     image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0
     ports:
-    - published: 80
-      target: 8080
+    - "80:8080"
     environment:
       FOO: bar
   redis:
@@ -110,5 +107,42 @@ services:
 	//assert
 	if got != "" {
 		t.Error("expected nil service")
+	}
+}
+
+func TestGetDockerServiceToDeploy_Two_37(t *testing.T) {
+
+	//create a docker-compose.yml representation
+	yml := `
+version: "3.7"
+services:
+  web:
+    build: .
+    image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0
+    ports:
+    - published: 80
+    - target: 8080
+    environment:
+      FOO: bar
+    labels:
+      aws.ecs.fargate.deploy: 1
+  redis:
+    image: redis
+`
+
+	//unmarshal the yaml
+	var compose dockercompose.DockerCompose
+	err := yaml.Unmarshal([]byte(yml), &compose)
+	if err != nil {
+		console.ErrorExit(err, "error unmarshalling docker-compose.yml")
+	}
+
+	//test
+	got, _ := getDockerServiceToDeploy(&compose)
+
+	//assert
+	expected := "web"
+	if got != expected {
+		t.Errorf("expected: %s, got: %s", expected, got)
 	}
 }
