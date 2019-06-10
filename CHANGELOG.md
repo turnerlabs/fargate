@@ -1,3 +1,10 @@
+## 0.7.1 (2019-06-10)
+
+### Bug Fixes
+
+- Fixes issue parsing Docker Compose v2.x ([#48](https://github.com/turnerlabs/fargate/pull/48))
+
+
 ## 0.7.0 (2019-06-05)
 
 ### Enhancements
