@@ -37,27 +37,6 @@ func New(file string) ComposeFile {
 	return result
 }
 
-// DockerCompose represents a docker-compose.yml file
-type DockerCompose struct {
-	Version  string              `yaml:"version"`
-	Services map[string]*Service `yaml:"services"`
-}
-
-// Port represents a port
-type Port struct {
-	Published int64 `yaml:"published"`
-	Target    int64 `yaml:"target"`
-}
-
-// Service represents a docker container
-type Service struct {
-	Image       string            `yaml:"image,omitempty"`
-	Ports       []Port            `yaml:"ports,omitempty"`
-	Environment map[string]string `yaml:"environment,omitempty"`
-	Secrets     map[string]string `yaml:"x-fargate-secrets,omitempty"`
-	Labels      map[string]string `yaml:"labels,omitempty"`
-}
-
 //Read reads the data structure from the file
 //note that all variable interpolations are fully rendered
 func (composeFile *ComposeFile) Read() {
