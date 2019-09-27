@@ -197,7 +197,7 @@ func addVarsToSecrets(currentVars []*awsecs.Secret, secretVars []Secret) []*awse
 	return secrets
 }
 
-//DescribeTaskDefinition fetches a task definition output from cache or aws 
+//DescribeTaskDefinition fetches a task definition output from cache or aws
 //(includes the taskdefinition itself along with its tags)
 func (ecs *ECS) DescribeTaskDefinition(taskDefinitionArn string) *awsecs.DescribeTaskDefinitionOutput {
 	if taskDefinitionCache[taskDefinitionArn] != nil {
@@ -288,6 +288,7 @@ func (ecs *ECS) registerTaskDefinition(dtd *awsecs.DescribeTaskDefinitionOutput)
 		NetworkMode:             dtd.TaskDefinition.NetworkMode,
 		RequiresCompatibilities: dtd.TaskDefinition.RequiresCompatibilities,
 		TaskRoleArn:             dtd.TaskDefinition.TaskRoleArn,
+		Volumes:                 dtd.TaskDefinition.Volumes,
 	}
 
 	//it's unfortunate that the tags aren't included in the task definition itself :(
