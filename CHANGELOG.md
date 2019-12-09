@@ -1,3 +1,10 @@
+## 0.7.2 (2019-12-09)
+
+### Bug Fixes
+
+- copy volumes when registering task definitions ([#51](https://github.com/turnerlabs/fargate/pull/51))
+
+
 ## 0.7.1 (2019-06-10)
 
 ### Bug Fixes
