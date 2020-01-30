@@ -82,27 +82,22 @@ func init() {
 }
 
 func deployService(operation *ServiceDeployOperation) {
+	var taskDefinitionArn string
 
 	if operation.ComposeFile != "" {
-		deployDockerComposeFile(operation)
-		return
+		taskDefinitionArn = deployDockerComposeFile(operation)
+	} else if operation.Revision != "" {
+		taskDefinitionArn = deployRevision(operation)
+	} else {
+		taskDefinitionArn = deployTaskDefinition(operation)
 	}
 
-	if operation.Revision != "" {
-		deployRevision(operation)
-		return
-	}
 
-	ecs := ECS.New(sess, getClusterName())
-	service := ecs.DescribeService(operation.ServiceName)
 
-	taskDefinitionArn := ecs.UpdateTaskDefinitionImage(service.TaskDefinitionArn, operation.Image)
-	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
-	console.Info("Deployed %s to service %s", operation.Image, operation.ServiceName)
 }
 
 //deploy a docker-compose.yml file to fargate
-func deployDockerComposeFile(operation *ServiceDeployOperation) {
+func deployDockerComposeFile(operation *ServiceDeployOperation) string {
 	var taskDefinitionArn string
 
 	ecs := ECS.New(sess, getClusterName())
@@ -125,10 +120,16 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) {
 	//update service with new task definition
 	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
 
-	console.Info("Deployed %s to service %s as revision %s", operation.ComposeFile, operation.ServiceName, ecs.GetRevisionNumber(taskDefinitionArn))
+	if flagServiceDeployDockerComposeImageOnly {
+		console.Info("Deployed %s to service %s", dockerService.Image, operation.ServiceName)
+	} else {
+		console.Info("Deployed %s to service %s as revision %s", operation.ComposeFile, operation.ServiceName, ecs.GetRevisionNumber(taskDefinitionArn))
+	}
+
+	return taskDefinitionArn
 }
 
-func deployRevision(operation *ServiceDeployOperation) {
+func deployRevision(operation *ServiceDeployOperation) string {
 	ecs := ECS.New(sess, getClusterName())
 	service := ecs.DescribeService(operation.ServiceName)
 
@@ -148,6 +149,20 @@ func deployRevision(operation *ServiceDeployOperation) {
 	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
 
 	console.Info("Deployed revision %s to service %s.", revisionNumber, operation.ServiceName)
+
+	return taskDefinitionArn
+}
+
+func deployTaskDefinition(operation *ServiceDeployOperation) string {
+	ecs := ECS.New(sess, getClusterName())
+	service := ecs.DescribeService(operation.ServiceName)
+	taskDefinitionArn := ecs.UpdateTaskDefinitionImage(service.TaskDefinitionArn, operation.Image)
+
+	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
+
+	console.Info("Deployed %s to service %s", operation.Image, operation.ServiceName)
+
+	return taskDefinitionArn
 }
 
 func getDockerServiceFromComposeFile(dockerComposeFile string) *dockercompose.Service {
