@@ -102,6 +102,8 @@ func deployService(operation *ServiceDeployOperation) {
 		service := ecs.DescribeService(operation.ServiceName)
 		if service.TaskDefinitionArn != taskDefinitionArn {
 			console.IssueExit("Stable revision %s does not match deployed revision %s", ecs.GetRevisionNumber(service.TaskDefinitionArn), ecs.GetRevisionNumber(taskDefinitionArn))
+		} else {
+			console.Info("Service %s has reached a steady state.", operation.ServiceName)
 		}
 	}
 }
