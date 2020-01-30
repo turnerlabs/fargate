@@ -92,8 +92,18 @@ func deployService(operation *ServiceDeployOperation) {
 		taskDefinitionArn = deployTaskDefinition(operation)
 	}
 
+	if operation.WaitForService {
+		ecs := ECS.New(sess, getClusterName())
 
+		console.Info("Waiting for service %s to reach a steady state...", operation.ServiceName)
+		ecs.WaitUntilServiceStable(operation.ServiceName)
 
+		//validate that the stable revision matches the deployed task
+		service := ecs.DescribeService(operation.ServiceName)
+		if service.TaskDefinitionArn != taskDefinitionArn {
+			console.IssueExit("Stable revision %s does not match deployed revision %s", ecs.GetRevisionNumber(service.TaskDefinitionArn), ecs.GetRevisionNumber(taskDefinitionArn))
+		}
+	}
 }
 
 //deploy a docker-compose.yml file to fargate
