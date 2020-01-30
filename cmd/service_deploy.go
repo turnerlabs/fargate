@@ -10,11 +10,12 @@ import (
 
 // ServiceDeployOperation represents a deploy operation
 type ServiceDeployOperation struct {
-	ServiceName string
-	Image       string
-	ComposeFile string
-	Region      string
-	Revision    string
+	ServiceName    string
+	Image          string
+	ComposeFile    string
+	Region         string
+	Revision       string
+	WaitForService bool
 }
 
 const deployDockerComposeLabel = "aws.ecs.fargate.deploy"
@@ -23,6 +24,7 @@ var flagServiceDeployImage string
 var flagServiceDeployDockerComposeFile string
 var flagServiceDeployDockerComposeImageOnly bool
 var flagServiceDeployRevision string
+var flagServiceDeployWaitForService bool
 
 var serviceDeployCmd = &cobra.Command{
 	Use:   "deploy",
@@ -48,11 +50,12 @@ fargate service deploy -r 37
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceDeployOperation{
-			ServiceName: getServiceName(),
-			Region:      region,
-			Image:       flagServiceDeployImage,
-			ComposeFile: flagServiceDeployDockerComposeFile,
-			Revision:    flagServiceDeployRevision,
+			ServiceName:    getServiceName(),
+			Region:         region,
+			Image:          flagServiceDeployImage,
+			ComposeFile:    flagServiceDeployDockerComposeFile,
+			Revision:       flagServiceDeployRevision,
+			WaitForService: flagServiceDeployWaitForService,
 		}
 
 		if !validateFlags(operation) {
@@ -72,6 +75,8 @@ func init() {
 	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployDockerComposeFile, "file", "f", "", "Specify a docker-compose.yml file to deploy. The image and environment variables in the file will be deployed.")
 
 	serviceDeployCmd.Flags().BoolVar(&flagServiceDeployDockerComposeImageOnly, "image-only", false, "Only deploy the image when a docker-compose.yml file is specified.")
+
+	serviceDeployCmd.Flags().BoolVar(&flagServiceDeployWaitForService, "wait-for-service", false, "Wait for the service to reach a steady state after deploying the new task definition.")
 
 	serviceCmd.AddCommand(serviceDeployCmd)
 }
