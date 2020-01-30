@@ -89,7 +89,7 @@ func deployService(operation *ServiceDeployOperation) {
 	} else if operation.Revision != "" {
 		taskDefinitionArn = deployRevision(operation)
 	} else {
-		taskDefinitionArn = deployTaskDefinition(operation)
+		taskDefinitionArn = deployImage(operation)
 	}
 
 	if operation.WaitForService {
@@ -165,7 +165,7 @@ func deployRevision(operation *ServiceDeployOperation) string {
 	return taskDefinitionArn
 }
 
-func deployTaskDefinition(operation *ServiceDeployOperation) string {
+func deployImage(operation *ServiceDeployOperation) string {
 	ecs := ECS.New(sess, getClusterName())
 	service := ecs.DescribeService(operation.ServiceName)
 	taskDefinitionArn := ecs.UpdateTaskDefinitionImage(service.TaskDefinitionArn, operation.Image)
