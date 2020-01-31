@@ -76,7 +76,7 @@ func init() {
 
 	serviceDeployCmd.Flags().BoolVar(&flagServiceDeployDockerComposeImageOnly, "image-only", false, "Only deploy the image when a docker-compose.yml file is specified.")
 
-	serviceDeployCmd.Flags().BoolVar(&flagServiceDeployWaitForService, "wait-for-service", false, "Wait for the service to reach a steady state after deploying the new task definition.")
+	serviceDeployCmd.Flags().BoolVarP(&flagServiceDeployWaitForService, "wait-for-service", "w", false, "Wait for the service to reach a steady state after deploying the new task definition.")
 
 	serviceCmd.AddCommand(serviceDeployCmd)
 }
