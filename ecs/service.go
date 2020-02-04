@@ -336,3 +336,16 @@ func (ecs *ECS) RestartService(serviceName string) {
 		console.ErrorExit(err, "Could not restart service")
 	}
 }
+
+func (ecs *ECS) WaitUntilServiceStable(serviceName string) {
+	err := ecs.svc.WaitUntilServicesStable(
+		&awsecs.DescribeServicesInput{
+			Cluster:  aws.String(ecs.ClusterName),
+			Services: aws.StringSlice([]string{serviceName}),
+		},
+	)
+
+	if err != nil {
+		console.ErrorExit(err, "Could not wait for ECS service to reach a steady state")
+	}
+}
