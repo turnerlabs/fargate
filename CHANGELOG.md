@@ -1,3 +1,10 @@
+## 0.8.0 (2020-02-20)
+
+### Enhancements
+
+- Adds `--wait-for-service` flag to `fargate service deploy` ([#52](https://github.com/turnerlabs/fargate/pull/52))
+
+
 ## 0.7.2 (2019-12-09)
 
 ### Bug Fixes
