@@ -10,12 +10,13 @@ import (
 
 // ServiceDeployOperation represents a deploy operation
 type ServiceDeployOperation struct {
-	ServiceName    string
-	Image          string
-	ComposeFile    string
-	Region         string
-	Revision       string
-	WaitForService bool
+	ServiceName      string
+	Image            string
+	ComposeFile      string
+	ComposeImageOnly bool
+	Region           string
+	Revision         string
+	WaitForService   bool
 }
 
 const deployDockerComposeLabel = "aws.ecs.fargate.deploy"
@@ -50,12 +51,13 @@ fargate service deploy -r 37
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceDeployOperation{
-			ServiceName:    getServiceName(),
-			Region:         region,
-			Image:          flagServiceDeployImage,
-			ComposeFile:    flagServiceDeployDockerComposeFile,
-			Revision:       flagServiceDeployRevision,
-			WaitForService: flagServiceDeployWaitForService,
+			ServiceName:      getServiceName(),
+			Region:           region,
+			Image:            flagServiceDeployImage,
+			ComposeFile:      flagServiceDeployDockerComposeFile,
+			ComposeImageOnly: flagServiceDeployDockerComposeImageOnly,
+			Revision:         flagServiceDeployRevision,
+			WaitForService:   flagServiceDeployWaitForService,
 		}
 
 		if !validateFlags(operation) {
@@ -93,50 +95,14 @@ func deployService(operation *ServiceDeployOperation) {
 	}
 
 	if operation.WaitForService {
-		ecs := ECS.New(sess, getClusterName())
-
-		console.Info("Waiting for service %s to reach a steady state...", operation.ServiceName)
-		ecs.WaitUntilServiceStable(operation.ServiceName)
-
-		//validate that the stable revision matches the deployed task
-		service := ecs.DescribeService(operation.ServiceName)
-		if service.TaskDefinitionArn != taskDefinitionArn {
-			console.IssueExit("Stable revision %s does not match deployed revision %s", ecs.GetRevisionNumber(service.TaskDefinitionArn), ecs.GetRevisionNumber(taskDefinitionArn))
-		} else {
-			console.Info("Service %s has reached a steady state.", operation.ServiceName)
-		}
+		waitForService(operation.ServiceName, taskDefinitionArn)
 	}
 }
 
 //deploy a docker-compose.yml file to fargate
 func deployDockerComposeFile(operation *ServiceDeployOperation) string {
-	var taskDefinitionArn string
-
-	ecs := ECS.New(sess, getClusterName())
-	ecsService := ecs.DescribeService(operation.ServiceName)
-
 	dockerService := getDockerServiceFromComposeFile(operation.ComposeFile)
-
-	envvars := convertDockerComposeEnvVarsToECSEnvVars(dockerService)
-	secrets := convertDockerComposeSecretsToECSSecrets(dockerService)
-
-	//if --image-only flag is set, update image only
-	if flagServiceDeployDockerComposeImageOnly {
-		//register a new task definition based on the image from the compose file
-		taskDefinitionArn = ecs.UpdateTaskDefinitionImage(ecsService.TaskDefinitionArn, dockerService.Image)
-	} else {
-		//register a new task definition based on the image and environment variables from the compose file
-		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, envvars, true, secrets)
-	}
-
-	//update service with new task definition
-	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
-
-	if flagServiceDeployDockerComposeImageOnly {
-		console.Info("Deployed %s to service %s", dockerService.Image, operation.ServiceName)
-	} else {
-		console.Info("Deployed %s to service %s as revision %s", operation.ComposeFile, operation.ServiceName, ecs.GetRevisionNumber(taskDefinitionArn))
-	}
+	taskDefinitionArn := deployDockerComposeService(operation.ServiceName, dockerService, operation.ComposeImageOnly)
 
 	return taskDefinitionArn
 }
@@ -212,6 +178,30 @@ func convertDockerComposeSecretsToECSSecrets(service *dockercompose.Service) []E
 	return result
 }
 
+func deployDockerComposeService(serviceName string, dockerService *dockercompose.Service, imageOnly bool) string {
+	var taskDefinitionArn string
+
+	ecs := ECS.New(sess, getClusterName())
+	ecsService := ecs.DescribeService(serviceName)
+	envvars := convertDockerComposeEnvVarsToECSEnvVars(dockerService)
+	secrets := convertDockerComposeSecretsToECSSecrets(dockerService)
+
+	if imageOnly {
+		//register a new task definition based on the image from the compose file
+		taskDefinitionArn = ecs.UpdateTaskDefinitionImage(ecsService.TaskDefinitionArn, dockerService.Image)
+	} else {
+		//register a new task definition based on the image and environment variables from the compose file
+		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(ecsService.TaskDefinitionArn, dockerService.Image, envvars, true, secrets)
+	}
+
+	//update service with new task definition
+	ecs.UpdateServiceTaskDefinition(serviceName, taskDefinitionArn)
+
+	console.Info("Deployed %s to service %s as revision %s", dockerService.Image, serviceName, ecs.GetRevisionNumber(taskDefinitionArn))
+
+	return taskDefinitionArn
+}
+
 //determine which docker-compose service/container to deploy
 func getDockerServiceToDeploy(dc *dockercompose.DockerCompose) (string, *dockercompose.Service) {
 	//look for label if there's more than 1
@@ -246,4 +236,19 @@ func validateFlags(operation *ServiceDeployOperation) bool {
 	valid := len(setFlags) == 1
 
 	return valid
+}
+
+func waitForService(serviceName string, taskDefinitionArn string) {
+	ecs := ECS.New(sess, getClusterName())
+
+	console.Info("Waiting for service %s to reach a steady state...", serviceName)
+	ecs.WaitUntilServiceStable(serviceName)
+
+	//validate that the stable revision matches the deployed task
+	service := ecs.DescribeService(serviceName)
+	if service.TaskDefinitionArn != taskDefinitionArn {
+		console.IssueExit("Stable revision %s does not match deployed revision %s", ecs.GetRevisionNumber(service.TaskDefinitionArn), ecs.GetRevisionNumber(taskDefinitionArn))
+	} else {
+		console.Info("Service %s has reached a steady state.", serviceName)
+	}
 }
