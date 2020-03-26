@@ -90,6 +90,7 @@ distribute traffic amongst the tasks in your service.
 
 - [list](#fargate-service-list)
 - [deploy](#fargate-service-deploy)
+- [compose](#fargate-service-compose)
 - [info](#fargate-service-info)
 - [logs](#fargate-service-logs)
 - [ps](#fargate-service-ps)
