@@ -159,6 +159,46 @@ services:
     image: redis
 ```
 
+##### fargate service compose
+
+```console
+fargate service compose [--file docker-compose.yml]
+```
+
+Deploy one or more services defined in a [docker compose file](https://docs.docker.com/compose/overview/)
+
+Each service name in the docker compose file will be used as the Fargate service name. Note that environments variables and secrets are replaced with what's in the compose file.
+
+Secrets can be defined as key-value pairs under the docker compose file extension field `x-fargate-secrets`. To use extension fields, the compose file version must be  at least `2.4` for the 2.x series or at least `3.7` for the 3.x series.
+
+You can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.ignore: 1` to prevent a specific service from being deployed. For example:
+
+```yaml
+version: "3.7"
+services:
+  web-dev:
+    build: ./web
+    image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-web-service:0.1.0
+    ports:
+    - 80:5000
+    environment:
+      FOO: bar
+      BAZ: bam
+    env_file:
+    - hidden.env
+    x-fargate-secrets:
+      QUX: arn:key:ssm:us-east-1:000000000000:parameter/path/to/my_parameter
+  backend-dev:
+    build: ./backend
+    image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-backend-service:0.1.0
+    environment:
+      PORT: 4000
+  redis:
+    image: redis
+    labels:
+      aws.ecs.fargate.ignore: 1
+```
+
 ##### fargate service info
 
 ```console
