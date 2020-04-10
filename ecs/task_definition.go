@@ -32,6 +32,21 @@ type CreateTaskDefinitionInput struct {
 	Tags             []*awsecs.Tag
 }
 
+//PortMapping ...
+type PortMapping struct {
+	ContainerPort int64
+	HostPort      int64
+}
+
+//ContainerDefinitionInput ...
+type ContainerDefinitionInput struct {
+	EnvVars      []EnvVar
+	Image        string
+	Name         string
+	PortMappings []PortMapping
+	SecretVars   []Secret
+}
+
 //EnvVar ...
 type EnvVar struct {
 	Key   string
@@ -56,36 +71,60 @@ func (a envSorter) Less(i, j int) bool {
 	return a[i].Key < a[j].Key
 }
 
+//CreateContainerDefinition creates a container definition from an input
+func (ecs *ECS) CreateContainerDefinition(input *ContainerDefinitionInput) *awsecs.ContainerDefinition {
+	containerDefinition := &awsecs.ContainerDefinition{
+		Environment: input.Environment(),
+		Essential:   aws.Bool(true),
+		Image:       aws.String(input.Image),
+		Name:        aws.String(input.Name),
+		Secrets:     input.Secrets(),
+	}
+
+	var portMappings []*awsecs.PortMapping
+	for _, pm := range input.PortMappings {
+		if pm.ContainerPort == 0 {
+			continue
+		}
+
+		portMaping := &awsecs.PortMapping{
+			ContainerPort: aws.Int64(int64(pm.ContainerPort)),
+		}
+
+		if pm.HostPort != 0 {
+			portMaping.HostPort = aws.Int64(int64(pm.HostPort))
+		}
+
+		portMappings = append(portMappings, portMaping)
+	}
+	containerDefinition.SetPortMappings(portMappings)
+
+	return containerDefinition
+}
+
 //CreateTaskDefinition creates a task definition from an input
 func (ecs *ECS) CreateTaskDefinition(input *CreateTaskDefinitionInput) string {
 	console.Debug("Creating ECS task definition")
 
-	logConfiguration := &awsecs.LogConfiguration{
+	containerDefinition := ecs.CreateContainerDefinition(&ContainerDefinitionInput{
+		EnvVars:    input.EnvVars,
+		Image:      input.Image,
+		Name:       input.Name,
+		SecretVars: input.SecretVars,
+		PortMappings: []PortMapping{
+			PortMapping{
+				ContainerPort: input.Port,
+			},
+		},
+	})
+
+	containerDefinition.LogConfiguration = &awsecs.LogConfiguration{
 		LogDriver: aws.String(awsecs.LogDriverAwslogs),
 		Options: map[string]*string{
 			"awslogs-region":        aws.String(input.LogRegion),
 			"awslogs-group":         aws.String(input.LogGroupName),
 			"awslogs-stream-prefix": aws.String(logStreamPrefix),
 		},
-	}
-
-	containerDefinition := &awsecs.ContainerDefinition{
-		Environment:      input.Environment(),
-		Essential:        aws.Bool(true),
-		Image:            aws.String(input.Image),
-		LogConfiguration: logConfiguration,
-		Name:             aws.String(input.Name),
-		Secrets:          input.Secrets(),
-	}
-
-	if input.Port != 0 {
-		containerDefinition.SetPortMappings(
-			[]*awsecs.PortMapping{
-				&awsecs.PortMapping{
-					ContainerPort: aws.Int64(int64(input.Port)),
-				},
-			},
-		)
 	}
 
 	resp, err := ecs.svc.RegisterTaskDefinition(
@@ -114,12 +153,12 @@ func (ecs *ECS) CreateTaskDefinition(input *CreateTaskDefinitionInput) string {
 }
 
 //Environment converts envvars to AWS format
-func (input *CreateTaskDefinitionInput) Environment() []*awsecs.KeyValuePair {
+func (input *ContainerDefinitionInput) Environment() []*awsecs.KeyValuePair {
 	return convertEnvVars(input.EnvVars)
 }
 
 //Secrets converts secrets to AWS format
-func (input *CreateTaskDefinitionInput) Secrets() []*awsecs.Secret {
+func (input *ContainerDefinitionInput) Secrets() []*awsecs.Secret {
 	return convertSecretVars(input.SecretVars)
 }
 
@@ -270,6 +309,39 @@ func (ecs *ECS) UpdateTaskDefinitionImageAndEnvVars(taskDefinitionArnOrFamily st
 				container.Secrets = append(container.Secrets, s)
 			}
 		}
+	}
+
+	return ecs.registerTaskDefinition(dtd)
+}
+
+//UpdateTaskDefinitionContainers creates a new, updated task definition
+// based on the specified container definitions.
+// Note that only predefined container definitions are updated
+func (ecs *ECS) UpdateTaskDefinitionContainers(taskDefinitionArnOrFamily string, containers []*awsecs.ContainerDefinition, imagesOnly bool) string {
+	//fetch task definition details (for specific or latest active)
+	dtd := ecs.DescribeTaskDefinition(taskDefinitionArnOrFamily)
+	updatedCount := 0
+
+	for _, input := range containers {
+		// find existing container definition by name
+		container := findContainerDefinitionByName(dtd.TaskDefinition.ContainerDefinitions, aws.StringValue(input.Name))
+
+		if container == nil {
+			continue
+		}
+
+		container.Image = input.Image
+
+		if !imagesOnly {
+			container.Environment = input.Environment
+			container.Secrets = input.Secrets
+		}
+
+		updatedCount++
+	}
+
+	if updatedCount == 0 {
+		console.IssueExit("No container definitions to update")
 	}
 
 	return ecs.registerTaskDefinition(dtd)
@@ -491,4 +563,17 @@ func (ecs *ECS) ResolveRevisionNumber(taskDefinitionArn string, revisionExpressi
 func (ecs *ECS) SortEnvVars(envVars []EnvVar) []EnvVar {
 	sort.Sort(envSorter(envVars))
 	return envVars
+}
+
+func findContainerDefinitionByName(containerDefitions []*awsecs.ContainerDefinition, name string) *awsecs.ContainerDefinition {
+	var result *awsecs.ContainerDefinition
+
+	for _, containerDefinition := range containerDefitions {
+		if aws.StringValue(containerDefinition.Name) == name {
+			result = containerDefinition
+			break
+		}
+	}
+
+	return result
 }

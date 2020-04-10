@@ -166,9 +166,9 @@ services:
 fargate service compose [--file docker-compose.yml]
 ```
 
-Deploy one or more services defined in a [docker compose file](https://docs.docker.com/compose/overview/)
+Deploy one or more container definitions defined in a [docker compose file](https://docs.docker.com/compose/overview/) to a service
 
-Each service name in the docker compose file will be used as the Fargate service name. Note that environments variables and secrets are replaced with what's in the compose file.
+Each service name in the docker compose file will be used as the container definition name. Note that the image, environments variables, and secrets are replaced with what's in the compose file. Only pre-existing container definitions will be updated.
 
 Secrets can be defined as key-value pairs under the docker compose file extension field `x-fargate-secrets`. To use extension fields, the compose file version must be  at least `2.4` for the 2.x series or at least `3.7` for the 3.x series.
 

@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"sync"
-
+	awsecs "github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
 	"github.com/turnerlabs/fargate/dockercompose"
+	ECS "github.com/turnerlabs/fargate/ecs"
 )
 
 // ServiceComposeOperation represents a deploy operation
@@ -13,13 +13,13 @@ type ServiceComposeOperation struct {
 	ComposeFile      string
 	ComposeImageOnly bool
 	Region           string
+	ServiceName      string
 	WaitForService   bool
 }
 
-// ServiceComposeService represents a Fargate service from a compose file
-type ServiceComposeService struct {
-	Name    string
-	Service *dockercompose.Service
+type serviceComposeContainer struct {
+	Name          string
+	DockerService *dockercompose.Service
 }
 
 const ignoreDockerComposeLabel = "aws.ecs.fargate.ignore"
@@ -30,21 +30,22 @@ var flagServiceComposeWaitForService bool
 
 var composeCmd = &cobra.Command{
 	Use:   "compose",
-	Short: "Deploy one or more services defined in a docker compose file",
-	Long: `Deploy one or more services defined in a docker compose file
+	Short: "Deploy one or more container definitions defined in a docker compose file",
+	Long: `Deploy one or more container definitions defined in a docker compose file
 
-Each service name in the docker compose file will be used as the Fargate
-service name. Note that environments variables and secrets are replaced
-with what's in the compose file.
+Each service name in the docker compose file will be used as the container definition
+name. Note that the image, environments variables, and secrets are replaced with what's in the
+compose file. Only pre-existing container definitions will be updated.
 `,
 	Example: `
 fargate service compose -f docker-compose.yml
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceComposeOperation{
-			Region:           region,
 			ComposeFile:      flagServiceComposeFile,
 			ComposeImageOnly: flagServiceComposeImageOnly,
+			Region:           region,
+			ServiceName:      getServiceName(),
 			WaitForService:   flagServiceComposeWaitForService,
 		}
 
@@ -53,7 +54,7 @@ fargate service compose -f docker-compose.yml
 			return
 		}
 
-		composeServices(operation)
+		composeService(operation)
 	},
 }
 
@@ -65,7 +66,7 @@ func init() {
 	serviceCmd.AddCommand(composeCmd)
 }
 
-func composeServices(operation *ServiceComposeOperation) {
+func composeService(operation *ServiceComposeOperation) {
 	//read the compose file configuration
 	composeFile := dockercompose.Read(operation.ComposeFile)
 	services := getComposeServicesToDeploy(&composeFile.Data)
@@ -74,26 +75,22 @@ func composeServices(operation *ServiceComposeOperation) {
 		console.IssueExit("Please specify at least one service to deploy")
 	}
 
-	//run deploy for each service in a goroutine
-	var wg sync.WaitGroup
-	for _, service := range services {
-		wg.Add(1)
-		go deployComposeService(service, operation, &wg)
-	}
+	taskDefinitionArn := deployDockerComposeContainers(operation.ServiceName, services, operation.ComposeImageOnly)
 
-	//wait for all services to deploy
-	wg.Wait()
+	if operation.WaitForService {
+		waitForService(operation.ServiceName, taskDefinitionArn)
+	}
 }
 
 //determine which docker-compose service/container to deploy
-func getComposeServicesToDeploy(dc *dockercompose.DockerCompose) []*ServiceComposeService {
-	services := []*ServiceComposeService{}
+func getComposeServicesToDeploy(dc *dockercompose.DockerCompose) []*serviceComposeContainer {
+	services := []*serviceComposeContainer{}
 
 	for name, service := range dc.Services {
 		if service.Labels[ignoreDockerComposeLabel] != "1" {
-			services = append(services, &ServiceComposeService{
-				Name:    name,
-				Service: service,
+			services = append(services, &serviceComposeContainer{
+				Name:          name,
+				DockerService: service,
 			})
 		}
 	}
@@ -101,12 +98,31 @@ func getComposeServicesToDeploy(dc *dockercompose.DockerCompose) []*ServiceCompo
 	return services
 }
 
-func deployComposeService(service *ServiceComposeService, operation *ServiceComposeOperation, wg *sync.WaitGroup) {
-	defer wg.Done()
+func deployDockerComposeContainers(serviceName string, services []*serviceComposeContainer, imagesOnly bool) string {
+	var containers []*awsecs.ContainerDefinition
 
-	taskDefinitionArn := deployDockerComposeService(service.Name, service.Service, operation.ComposeImageOnly)
+	ecs := ECS.New(sess, getClusterName())
+	ecsService := ecs.DescribeService(serviceName)
 
-	if operation.WaitForService {
-		waitForService(service.Name, taskDefinitionArn)
+	for _, s := range services {
+		envvars := convertDockerComposeEnvVarsToECSEnvVars(s.DockerService)
+		secrets := convertDockerComposeSecretsToECSSecrets(s.DockerService)
+
+		container := ecs.CreateContainerDefinition(&ECS.ContainerDefinitionInput{
+			EnvVars:    envvars,
+			Name:       s.Name,
+			Image:      s.DockerService.Image,
+			SecretVars: secrets,
+		})
+		containers = append(containers, container)
 	}
+
+	taskDefinitionArn := ecs.UpdateTaskDefinitionContainers(ecsService.TaskDefinitionArn, containers, imagesOnly)
+
+	//update service with new task definition
+	ecs.UpdateServiceTaskDefinition(serviceName, taskDefinitionArn)
+
+	console.Info("Deployed revision %s to service %s.", ecs.GetRevisionNumber(taskDefinitionArn), serviceName)
+
+	return taskDefinitionArn
 }

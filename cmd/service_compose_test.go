@@ -87,7 +87,7 @@ services:
 			t.Errorf("expected: %s, got: %s", expected, got)
 		}
 
-		got = service.Service.Image
+		got = service.DockerService.Image
 		expected = images[i]
 
 		//assert
@@ -144,7 +144,7 @@ services:
 			t.Errorf("expected: %s, got: %s", expected, got)
 		}
 
-		got = service.Service.Image
+		got = service.DockerService.Image
 		expected = images[i]
 
 		//assert
