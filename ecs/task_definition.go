@@ -324,10 +324,18 @@ func (ecs *ECS) UpdateTaskDefinitionContainers(taskDefinitionArnOrFamily string,
 
 	for _, input := range containers {
 		// find existing container definition by name
-		container := findContainerDefinitionByName(dtd.TaskDefinition.ContainerDefinitions, aws.StringValue(input.Name))
+		name := aws.StringValue(input.Name)
+		container := findContainerDefinitionByName(dtd.TaskDefinition.ContainerDefinitions, name)
 
 		if container == nil {
-			continue
+			if len(containers) == 0 && dtd.TaskDefinition.ContainerDefinitions[0] != nil {
+				// default to first container definition when only updating one
+				container = dtd.TaskDefinition.ContainerDefinitions[0]
+			} else {
+				// ignore container definition when updating multiple and not defined in previous revision
+				console.Info("Skipping container definition: %s, does not exist in current task definition", name)
+				continue
+			}
 		}
 
 		container.Image = input.Image
