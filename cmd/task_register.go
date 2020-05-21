@@ -3,11 +3,15 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/turnerlabs/fargate/console"
+
 	"github.com/spf13/cobra"
+	"github.com/turnerlabs/fargate/dockercompose"
 	ECS "github.com/turnerlabs/fargate/ecs"
 )
 
 var flagTaskRegisterImage string
+var flagTaskRegisterDockerComposeAll bool
 var flagTaskRegisterDockerComposeFile string
 var flagTaskRegisterEnvVars []string
 var flagTaskRegisterEnvFile string
@@ -21,6 +25,7 @@ type taskRegisterOperation struct {
 	Image       string
 	EnvVars     []string
 	EnvFile     string
+	ComposeAll  bool
 	ComposeFile string
 	SecretVars  []string
 	SecretFile  string
@@ -31,12 +36,13 @@ var taskRegisterCmd = &cobra.Command{
 	Short: "Registers a new task definition revision for the specified docker image or environment variables based on the latest revision of the task family and returns the new revision number.",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		operation := taskRegisterOperation{
+		operation := &taskRegisterOperation{
 			Cluster:     getClusterName(),
 			Task:        getTaskName(),
 			Image:       flagTaskRegisterImage,
 			EnvVars:     flagTaskRegisterEnvVars,
 			EnvFile:     flagTaskRegisterEnvFile,
+			ComposeAll:  flagTaskRegisterDockerComposeAll,
 			ComposeFile: flagTaskRegisterDockerComposeFile,
 			SecretVars:  flagTaskRegisterSecretVars,
 			SecretFile:  flagTaskRegisterSecretFile,
@@ -76,6 +82,8 @@ func init() {
 
 	taskRegisterCmd.Flags().StringVarP(&flagTaskRegisterDockerComposeFile, "file", "f", "", "Docker Compose file containing image and environment variables to register.")
 
+	taskRegisterCmd.Flags().BoolVar(&flagTaskRegisterDockerComposeAll, "compose-all", false, "Register all container definitions when a docker-compose.yml file is specified.")
+
 	taskRegisterCmd.Flags().StringArrayVar(&flagTaskRegisterSecretVars, "secret", []string{}, "Secret variables to set [e.g. --secret KEY=valueFrom --secret KEY2=valueFrom]")
 
 	taskRegisterCmd.Flags().StringVar(&flagTaskRegisterSecretFile, "secret-file", "", "File containing list of secret variables to set, one per line, of the form KEY=valueFrom")
@@ -83,36 +91,42 @@ func init() {
 	taskCmd.AddCommand(taskRegisterCmd)
 }
 
-func registerTask(op taskRegisterOperation) {
+func registerTask(op *taskRegisterOperation) {
+	var taskDefinitionArn string
+
+	ecs := ECS.New(sess, op.Cluster)
 
 	//are we registering from cli args or a compose file?
-	image := op.Image
-	var envvars []ECS.EnvVar
-	var secrets []ECS.Secret
-	replaceVars := false
-
 	if op.ComposeFile != "" {
-		dockerService := getDockerServiceFromComposeFile(op.ComposeFile)
-		image = dockerService.Image
-		envvars = convertDockerComposeEnvVarsToECSEnvVars(dockerService)
-		secrets = convertDockerComposeSecretsToECSSecrets(dockerService)
-		replaceVars = true
-
+		taskDefinitionArn = registerDockerComposeFile(op)
 	} else {
 		//read env file (if specified) and combine with other envvars
-		envvars = processEnvVarArgs(op.EnvVars, op.EnvFile)
+		envvars := processEnvVarArgs(op.EnvVars, op.EnvFile)
 
 		//read secrets file (if specified) and combine with other secret vars
-		secrets = processSecretVarArgs(op.SecretVars, op.SecretFile)
+		secrets := processSecretVarArgs(op.SecretVars, op.SecretFile)
 
-		//don't replace, just add, update where exists
-		replaceVars = false
+		//update and register new task definition
+		taskDefinitionArn = ecs.UpdateTaskDefinitionImageAndEnvVars(op.Task, op.Image, envvars, false, secrets)
 	}
 
-	//update and register new task definition
-	ecs := ECS.New(sess, op.Cluster)
-	newTD := ecs.UpdateTaskDefinitionImageAndEnvVars(op.Task, image, envvars, replaceVars, secrets)
-
 	//output new revision
-	fmt.Println(ecs.GetRevisionNumber(newTD))
+	fmt.Println(ecs.GetRevisionNumber(taskDefinitionArn))
+}
+
+func registerDockerComposeFile(operation *taskRegisterOperation) string {
+	ecs := ECS.New(sess, operation.Cluster)
+
+	//read the compose file configuration
+	composeFile := dockercompose.Read(operation.ComposeFile)
+	dockerServices, err := getDockerServicesFromComposeFile(&composeFile.Data, !operation.ComposeAll)
+
+	if err != nil {
+		console.IssueExit(err.Error())
+	}
+
+	containerDefinitions := convertDockerServicesToContainerDefinitions(dockerServices)
+	taskDefinitionArn := ecs.UpdateTaskDefinitionContainers(operation.Task, containerDefinitions, false)
+
+	return taskDefinitionArn
 }
