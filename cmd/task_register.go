@@ -126,7 +126,7 @@ func registerDockerComposeFile(operation *taskRegisterOperation) string {
 	}
 
 	containerDefinitions := convertDockerServicesToContainerDefinitions(dockerServices)
-	taskDefinitionArn := ecs.UpdateTaskDefinitionContainers(operation.Task, containerDefinitions, false)
+	taskDefinitionArn := ecs.UpdateTaskDefinitionContainers(operation.Task, containerDefinitions, false, operation.ComposeAll)
 
 	return taskDefinitionArn
 }

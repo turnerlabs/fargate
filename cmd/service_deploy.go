@@ -128,7 +128,7 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) string {
 
 	//register new task definition with container definitions from docker compose services
 	containerDefinitions := convertDockerServicesToContainerDefinitions(dockerServices)
-	taskDefinitionArn := ecs.UpdateTaskDefinitionContainers(ecsService.TaskDefinitionArn, containerDefinitions, operation.ComposeImageOnly)
+	taskDefinitionArn := ecs.UpdateTaskDefinitionContainers(ecsService.TaskDefinitionArn, containerDefinitions, operation.ComposeImageOnly, operation.ComposeAll)
 
 	//update service with new task definition
 	ecs.UpdateServiceTaskDefinition(serviceName, taskDefinitionArn)

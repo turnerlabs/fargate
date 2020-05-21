@@ -317,7 +317,7 @@ func (ecs *ECS) UpdateTaskDefinitionImageAndEnvVars(taskDefinitionArnOrFamily st
 //UpdateTaskDefinitionContainers creates a new, updated task definition
 // based on the specified container definitions.
 // Note that only predefined container definitions are updated
-func (ecs *ECS) UpdateTaskDefinitionContainers(taskDefinitionArnOrFamily string, containers []*awsecs.ContainerDefinition, imagesOnly bool) string {
+func (ecs *ECS) UpdateTaskDefinitionContainers(taskDefinitionArnOrFamily string, containers []*awsecs.ContainerDefinition, imagesOnly bool, strict bool) string {
 	//fetch task definition details (for specific or latest active)
 	dtd := ecs.DescribeTaskDefinition(taskDefinitionArnOrFamily)
 	updatedCount := 0
@@ -328,8 +328,8 @@ func (ecs *ECS) UpdateTaskDefinitionContainers(taskDefinitionArnOrFamily string,
 		container := findContainerDefinitionByName(dtd.TaskDefinition.ContainerDefinitions, name)
 
 		if container == nil {
-			if len(containers) == 0 && dtd.TaskDefinition.ContainerDefinitions[0] != nil {
-				// default to first container definition when only updating one
+			// if strict match not requires, default to first container definition when only updating one
+			if !strict && len(containers) == 1 && dtd.TaskDefinition.ContainerDefinitions[0] != nil {
 				container = dtd.TaskDefinition.ContainerDefinitions[0]
 			} else {
 				// ignore container definition when updating multiple and not defined in previous revision
