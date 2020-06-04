@@ -131,9 +131,9 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) string {
 	taskDefinitionArn := ecs.UpdateTaskDefinitionContainers(ecsService.TaskDefinitionArn, containerDefinitions, operation.ComposeImageOnly, operation.ComposeAll)
 
 	//update service with new task definition
-	ecs.UpdateServiceTaskDefinition(serviceName, taskDefinitionArn)
+	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
 
-	console.Info("Deployed revision %s to service %s.", ecs.GetRevisionNumber(taskDefinitionArn), serviceName)
+	console.Info("Deployed revision %s to service %s.", ecs.GetRevisionNumber(taskDefinitionArn), operation.ServiceName)
 
 	return taskDefinitionArn
 }
