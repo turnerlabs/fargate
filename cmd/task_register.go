@@ -119,7 +119,7 @@ func registerDockerComposeFile(operation *taskRegisterOperation) string {
 
 	//read the compose file configuration
 	composeFile := dockercompose.Read(operation.ComposeFile)
-	dockerServices, err := getDockerServicesFromComposeFile(&composeFile.Data, !operation.ComposeAll)
+	dockerServices, err := getDockerServicesFromComposeFile(&composeFile.Data, operation.ComposeAll)
 
 	if err != nil {
 		console.IssueExit(err.Error())
