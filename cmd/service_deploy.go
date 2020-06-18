@@ -13,6 +13,7 @@ import (
 
 // ServiceDeployOperation represents a deploy operation
 type ServiceDeployOperation struct {
+	Container        string
 	ServiceName      string
 	Image            string
 	ComposeFile      string
@@ -25,6 +26,7 @@ type ServiceDeployOperation struct {
 const deployDockerComposeLabel = "aws.ecs.fargate.deploy"
 const ignoreDockerComposeLabel = "aws.ecs.fargate.ignore"
 
+var flagServiceDeployContainer string
 var flagServiceDeployImage string
 var flagServiceDeployDockerComposeFile string
 var flagServiceDeployDockerComposeImageOnly bool
@@ -53,13 +55,13 @@ deployed revision.
 	Example: `
 fargate service deploy -i 123456789.dkr.ecr.us-east-1.amazonaws.com/my-service:1.0
 fargate service deploy -f docker-compose.yml
-fargate service deploy -a -f docker-compose.yml
 fargate service deploy -r 37
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceDeployOperation{
 			ServiceName:      getServiceName(),
 			Region:           region,
+			Container:        flagServiceDeployContainer,
 			Image:            flagServiceDeployImage,
 			ComposeFile:      flagServiceDeployDockerComposeFile,
 			ComposeImageOnly: flagServiceDeployDockerComposeImageOnly,
@@ -77,6 +79,8 @@ fargate service deploy -r 37
 }
 
 func init() {
+	serviceDeployCmd.Flags().StringVar(&flagServiceDeployContainer, "container", "", "Container definition by name to update")
+
 	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployImage, "image", "i", "", "Docker image to run in the service")
 
 	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployRevision, "revision", "r", "", "Task definition revision number")
@@ -159,7 +163,7 @@ func deployRevision(operation *ServiceDeployOperation) string {
 func deployImage(operation *ServiceDeployOperation) string {
 	ecs := ECS.New(sess, getClusterName())
 	service := ecs.DescribeService(operation.ServiceName)
-	taskDefinitionArn := ecs.UpdateTaskDefinitionImage(service.TaskDefinitionArn, operation.Image)
+	taskDefinitionArn := ecs.UpdateTaskDefinitionImage(service.TaskDefinitionArn, operation.Image, operation.Container)
 
 	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
 
@@ -236,7 +240,17 @@ func getDockerServicesFromComposeFile(dc *dockercompose.DockerCompose) (map[stri
 
 //Check incompatible flag combinations
 func validateFlags(operation *ServiceDeployOperation) bool {
-	strFlags := []string{operation.Image, operation.ComposeFile, operation.Revision}
+	if operation.ComposeFile != "" {
+		for _, v := range []string{operation.Container, operation.Image, operation.Revision} {
+			if v == "" {
+				return false
+			}
+		}
+	} else if operation.ComposeImageOnly {
+		return false
+	}
+
+	strFlags := []string{operation.Image, operation.Revision}
 	setFlags := make([]string, 0)
 
 	for _, v := range strFlags {

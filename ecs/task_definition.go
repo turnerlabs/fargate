@@ -261,9 +261,27 @@ func (ecs *ECS) DescribeTaskDefinition(taskDefinitionArn string) *awsecs.Describ
 }
 
 //UpdateTaskDefinitionImage registers a new task definition with the updated image
-func (ecs *ECS) UpdateTaskDefinitionImage(taskDefinitionArn, image string) string {
+func (ecs *ECS) UpdateTaskDefinitionImage(taskDefinitionArn, image string, containerName string) string {
 	dtd := ecs.DescribeTaskDefinition(taskDefinitionArn)
-	dtd.TaskDefinition.ContainerDefinitions[0].Image = aws.String(image)
+	var container *awsecs.ContainerDefinition
+
+	if containerName == "" {
+		container = dtd.TaskDefinition.ContainerDefinitions[0]
+	} else {
+		for _, c := range dtd.TaskDefinition.ContainerDefinitions {
+			if aws.StringValue(c.Name) == containerName {
+				container = c
+				break
+			}
+		}
+	}
+
+	if container == nil {
+		console.IssueExit("Could not find container definition")
+	}
+
+	container.Image = aws.String(image)
+
 	return ecs.registerTaskDefinition(dtd)
 }
 
