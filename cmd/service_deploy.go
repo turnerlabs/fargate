@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 
 	awsecs "github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/spf13/cobra"
@@ -16,7 +15,6 @@ import (
 type ServiceDeployOperation struct {
 	ServiceName      string
 	Image            string
-	ComposeAll       bool
 	ComposeFile      string
 	ComposeImageOnly bool
 	Region           string
@@ -28,7 +26,6 @@ const deployDockerComposeLabel = "aws.ecs.fargate.deploy"
 const ignoreDockerComposeLabel = "aws.ecs.fargate.ignore"
 
 var flagServiceDeployImage string
-var flagServiceDeployDockerComposeAll bool
 var flagServiceDeployDockerComposeFile string
 var flagServiceDeployDockerComposeImageOnly bool
 var flagServiceDeployRevision string
@@ -64,7 +61,6 @@ fargate service deploy -r 37
 			ServiceName:      getServiceName(),
 			Region:           region,
 			Image:            flagServiceDeployImage,
-			ComposeAll:       flagServiceDeployDockerComposeAll,
 			ComposeFile:      flagServiceDeployDockerComposeFile,
 			ComposeImageOnly: flagServiceDeployDockerComposeImageOnly,
 			Revision:         flagServiceDeployRevision,
@@ -88,8 +84,6 @@ func init() {
 	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployDockerComposeFile, "file", "f", "", "Specify a docker-compose.yml file to deploy. The image and environment variables in the file will be deployed.")
 
 	serviceDeployCmd.Flags().BoolVar(&flagServiceDeployDockerComposeImageOnly, "image-only", false, "Only deploy the image when a docker-compose.yml file is specified.")
-
-	serviceDeployCmd.Flags().BoolVar(&flagServiceDeployDockerComposeAll, "compose-all", false, "Deploy all container definitions when a docker-compose.yml file is specified.")
 
 	serviceDeployCmd.Flags().BoolVarP(&flagServiceDeployWaitForService, "wait-for-service", "w", false, "Wait for the service to reach a steady state after deploying the new task definition.")
 
@@ -120,7 +114,7 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) string {
 
 	//read the compose file configuration
 	composeFile := dockercompose.Read(operation.ComposeFile)
-	dockerServices, err := getDockerServicesFromComposeFile(&composeFile.Data, operation.ComposeAll)
+	dockerServices, err := getDockerServicesFromComposeFile(&composeFile.Data)
 
 	if err != nil {
 		console.IssueExit(err.Error())
@@ -128,7 +122,7 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) string {
 
 	//register new task definition with container definitions from docker compose services
 	containerDefinitions := convertDockerServicesToContainerDefinitions(dockerServices)
-	taskDefinitionArn := ecs.UpdateTaskDefinitionContainers(ecsService.TaskDefinitionArn, containerDefinitions, operation.ComposeImageOnly, operation.ComposeAll)
+	taskDefinitionArn := ecs.UpdateTaskDefinitionContainers(ecsService.TaskDefinitionArn, containerDefinitions, operation.ComposeImageOnly)
 
 	//update service with new task definition
 	ecs.UpdateServiceTaskDefinition(operation.ServiceName, taskDefinitionArn)
@@ -214,29 +208,27 @@ func convertDockerServicesToContainerDefinitions(services map[string]*dockercomp
 }
 
 //determine which docker-compose services/containers to deploy
-func getDockerServicesFromComposeFile(dc *dockercompose.DockerCompose, composeAll bool) (map[string]*dockercompose.Service, error) {
+func getDockerServicesFromComposeFile(dc *dockercompose.DockerCompose) (map[string]*dockercompose.Service, error) {
 	var err error
 	results := make(map[string]*dockercompose.Service)
 
 	for name, service := range dc.Services {
-		if composeAll {
-			if service.Labels[ignoreDockerComposeLabel] != "1" {
-				results[name] = service
-			}
-		} else if len(dc.Services) == 1 || service.Labels[deployDockerComposeLabel] == "1" {
-			// if only looking for single service,
-			// return the only defined container or the first with deploy label defined
+		if service.Labels[ignoreDockerComposeLabel] == "1" {
+			continue
+		}
+
+		// legacy, only deploy a single container if "aws.ecs.fargate.deploy" is "1"
+		if service.Labels[deployDockerComposeLabel] == "1" {
+			results = make(map[string]*dockercompose.Service)
 			results[name] = service
 			break
 		}
+
+		results[name] = service
 	}
 
 	if len(results) == 0 {
-		if composeAll {
-			err = errors.New("Please indicate at least one docker container you'd like to deploy")
-		} else {
-			err = fmt.Errorf(`Please indicate which docker container you'd like to deploy using the label "%s: 1"`, deployDockerComposeLabel)
-		}
+		err = errors.New("Please indicate at least one docker container you'd like to deploy")
 	}
 
 	return results, err

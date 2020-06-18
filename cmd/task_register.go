@@ -11,7 +11,6 @@ import (
 )
 
 var flagTaskRegisterImage string
-var flagTaskRegisterDockerComposeAll bool
 var flagTaskRegisterDockerComposeFile string
 var flagTaskRegisterEnvVars []string
 var flagTaskRegisterEnvFile string
@@ -25,7 +24,6 @@ type taskRegisterOperation struct {
 	Image       string
 	EnvVars     []string
 	EnvFile     string
-	ComposeAll  bool
 	ComposeFile string
 	SecretVars  []string
 	SecretFile  string
@@ -42,7 +40,6 @@ var taskRegisterCmd = &cobra.Command{
 			Image:       flagTaskRegisterImage,
 			EnvVars:     flagTaskRegisterEnvVars,
 			EnvFile:     flagTaskRegisterEnvFile,
-			ComposeAll:  flagTaskRegisterDockerComposeAll,
 			ComposeFile: flagTaskRegisterDockerComposeFile,
 			SecretVars:  flagTaskRegisterSecretVars,
 			SecretFile:  flagTaskRegisterSecretFile,
@@ -82,8 +79,6 @@ func init() {
 
 	taskRegisterCmd.Flags().StringVarP(&flagTaskRegisterDockerComposeFile, "file", "f", "", "Docker Compose file containing image and environment variables to register.")
 
-	taskRegisterCmd.Flags().BoolVar(&flagTaskRegisterDockerComposeAll, "compose-all", false, "Register all container definitions when a docker-compose.yml file is specified.")
-
 	taskRegisterCmd.Flags().StringArrayVar(&flagTaskRegisterSecretVars, "secret", []string{}, "Secret variables to set [e.g. --secret KEY=valueFrom --secret KEY2=valueFrom]")
 
 	taskRegisterCmd.Flags().StringVar(&flagTaskRegisterSecretFile, "secret-file", "", "File containing list of secret variables to set, one per line, of the form KEY=valueFrom")
@@ -119,14 +114,14 @@ func registerDockerComposeFile(operation *taskRegisterOperation) string {
 
 	//read the compose file configuration
 	composeFile := dockercompose.Read(operation.ComposeFile)
-	dockerServices, err := getDockerServicesFromComposeFile(&composeFile.Data, operation.ComposeAll)
+	dockerServices, err := getDockerServicesFromComposeFile(&composeFile.Data)
 
 	if err != nil {
 		console.IssueExit(err.Error())
 	}
 
 	containerDefinitions := convertDockerServicesToContainerDefinitions(dockerServices)
-	taskDefinitionArn := ecs.UpdateTaskDefinitionContainers(operation.Task, containerDefinitions, false, operation.ComposeAll)
+	taskDefinitionArn := ecs.UpdateTaskDefinitionContainers(operation.Task, containerDefinitions, false)
 
 	return taskDefinitionArn
 }

@@ -30,7 +30,7 @@ services:
 	}
 
 	//test
-	got, _ := getDockerServicesFromComposeFile(&compose, false)
+	got, _ := getDockerServicesFromComposeFile(&compose)
 	expected := map[string]*dockercompose.Service{
 		"web": &dockercompose.Service{
 			Image: "1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0",
@@ -80,7 +80,7 @@ services:
 	}
 
 	//test
-	got, _ := getDockerServicesFromComposeFile(&compose, false)
+	got, _ := getDockerServicesFromComposeFile(&compose)
 	expected := map[string]*dockercompose.Service{
 		"web": &dockercompose.Service{
 			Image: "1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0",
@@ -101,38 +101,6 @@ services:
 		if actual.Image != service.Image {
 			t.Errorf("expected: %s, got %s", service.Image, actual.Image)
 		}
-	}
-}
-
-func TestGetDockerServicesFromComposeFile_NoLabel(t *testing.T) {
-	//create a docker-compose.yml representation
-	yml := `
-version: "2"
-services:
-  web:
-    build: .
-    image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0
-    ports:
-    - "80:8080"
-    environment:
-      FOO: bar
-  redis:
-    image: redis
-`
-
-	//unmarshal the yaml
-	var compose dockercompose.DockerCompose
-	err := yaml.Unmarshal([]byte(yml), &compose)
-	if err != nil {
-		console.ErrorExit(err, "error unmarshalling docker-compose.yml")
-	}
-
-	//test
-	expected := "Please indicate which docker container you'd like to deploy using the label \"aws.ecs.fargate.deploy: 1\""
-	_, got := getDockerServicesFromComposeFile(&compose, false)
-
-	if got.Error() != expected {
-		t.Errorf("expected error: %v, got error: %v", expected, got)
 	}
 }
 
@@ -164,7 +132,7 @@ services:
 	}
 
 	//test
-	got, _ := getDockerServicesFromComposeFile(&compose, false)
+	got, _ := getDockerServicesFromComposeFile(&compose)
 	expected := map[string]*dockercompose.Service{
 		"web": &dockercompose.Service{
 			Image: "1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0",
@@ -210,7 +178,7 @@ services:
 	}
 
 	//test
-	got, _ := getDockerServicesFromComposeFile(&compose, true)
+	got, _ := getDockerServicesFromComposeFile(&compose)
 	expected := map[string]*dockercompose.Service{
 		"app": &dockercompose.Service{
 			Image: "1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0",
@@ -257,7 +225,7 @@ services:
 	}
 
 	//test
-	got, _ := getDockerServicesFromComposeFile(&compose, true)
+	got, _ := getDockerServicesFromComposeFile(&compose)
 	expected := map[string]*dockercompose.Service{
 		"app": &dockercompose.Service{
 			Image: "1234567890.dkr.ecr.us-east-1.amazonaws.com/my-app:0.1.0",
@@ -311,7 +279,7 @@ services:
 	}
 
 	//test
-	got, _ := getDockerServicesFromComposeFile(&compose, true)
+	got, _ := getDockerServicesFromComposeFile(&compose)
 	expected := map[string]*dockercompose.Service{
 		"web": &dockercompose.Service{
 			Image: "1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0",
@@ -366,7 +334,7 @@ services:
 
 	//test
 	expected := "Please indicate at least one docker container you'd like to deploy"
-	_, got := getDockerServicesFromComposeFile(&compose, true)
+	_, got := getDockerServicesFromComposeFile(&compose)
 
 	if got.Error() != expected {
 		t.Errorf("expected error: %v, got error: %v", expected, got)
