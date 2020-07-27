@@ -12,7 +12,7 @@ import (
 type ServiceDeployOperation struct {
 	ServiceName    string
 	Image          string
-	ComposeFile    string
+	ComposeFiles   []string
 	Region         string
 	Revision       string
 	WaitForService bool
@@ -21,7 +21,7 @@ type ServiceDeployOperation struct {
 const deployDockerComposeLabel = "aws.ecs.fargate.deploy"
 
 var flagServiceDeployImage string
-var flagServiceDeployDockerComposeFile string
+var flagServiceDeployDockerComposeFile []string
 var flagServiceDeployDockerComposeImageOnly bool
 var flagServiceDeployRevision string
 var flagServiceDeployWaitForService bool
@@ -53,7 +53,7 @@ fargate service deploy -r 37
 			ServiceName:    getServiceName(),
 			Region:         region,
 			Image:          flagServiceDeployImage,
-			ComposeFile:    flagServiceDeployDockerComposeFile,
+			ComposeFiles:   flagServiceDeployDockerComposeFile,
 			Revision:       flagServiceDeployRevision,
 			WaitForService: flagServiceDeployWaitForService,
 		}
@@ -63,6 +63,7 @@ fargate service deploy -r 37
 			return
 		}
 
+		console.Info("here")
 		deployService(operation)
 	},
 }
@@ -72,7 +73,7 @@ func init() {
 
 	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployRevision, "revision", "r", "", "Task definition revision number")
 
-	serviceDeployCmd.Flags().StringVarP(&flagServiceDeployDockerComposeFile, "file", "f", "", "Specify a docker-compose.yml file to deploy. The image and environment variables in the file will be deployed.")
+	serviceDeployCmd.Flags().StringArrayVarP(&flagServiceDeployDockerComposeFile, "file", "f", []string{}, "Specify a docker-compose.yml file to deploy. The image and environment variables in the file will be deployed.")
 
 	serviceDeployCmd.Flags().BoolVar(&flagServiceDeployDockerComposeImageOnly, "image-only", false, "Only deploy the image when a docker-compose.yml file is specified.")
 
@@ -82,9 +83,10 @@ func init() {
 }
 
 func deployService(operation *ServiceDeployOperation) {
+	console.Info("Hello?!")
 	var taskDefinitionArn string
 
-	if operation.ComposeFile != "" {
+	if len(operation.ComposeFiles) > 0 {
 		taskDefinitionArn = deployDockerComposeFile(operation)
 	} else if operation.Revision != "" {
 		taskDefinitionArn = deployRevision(operation)
@@ -112,10 +114,9 @@ func deployService(operation *ServiceDeployOperation) {
 func deployDockerComposeFile(operation *ServiceDeployOperation) string {
 	var taskDefinitionArn string
 
+	dockerService := getDockerServiceFromComposeFile(operation.ComposeFiles)
 	ecs := ECS.New(sess, getClusterName())
 	ecsService := ecs.DescribeService(operation.ServiceName)
-
-	dockerService := getDockerServiceFromComposeFile(operation.ComposeFile)
 
 	envvars := convertDockerComposeEnvVarsToECSEnvVars(dockerService)
 	secrets := convertDockerComposeSecretsToECSSecrets(dockerService)
@@ -135,7 +136,7 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) string {
 	if flagServiceDeployDockerComposeImageOnly {
 		console.Info("Deployed %s to service %s", dockerService.Image, operation.ServiceName)
 	} else {
-		console.Info("Deployed %s to service %s as revision %s", operation.ComposeFile, operation.ServiceName, ecs.GetRevisionNumber(taskDefinitionArn))
+		console.Info("Deployed %s to service %s as revision %s", operation.ComposeFiles, operation.ServiceName, ecs.GetRevisionNumber(taskDefinitionArn))
 	}
 
 	return taskDefinitionArn
@@ -177,9 +178,9 @@ func deployImage(operation *ServiceDeployOperation) string {
 	return taskDefinitionArn
 }
 
-func getDockerServiceFromComposeFile(dockerComposeFile string) *dockercompose.Service {
+func getDockerServiceFromComposeFile(dockerComposeFiles []string) *dockercompose.Service {
 	//read the compose file configuration
-	composeFile := dockercompose.Read(dockerComposeFile)
+	composeFile := dockercompose.Read(dockerComposeFiles)
 
 	//determine which docker-compose service/container to deploy
 	_, dockerService := getDockerServiceToDeploy(&composeFile.Data)
@@ -234,7 +235,11 @@ func getDockerServiceToDeploy(dc *dockercompose.DockerCompose) (string, *dockerc
 
 //Check incompatible flag combinations
 func validateFlags(operation *ServiceDeployOperation) bool {
-	strFlags := []string{operation.Image, operation.ComposeFile, operation.Revision}
+	var cf string
+	if len(operation.ComposeFiles) > 0 {
+		cf = operation.ComposeFiles[0]
+	}
+	strFlags := []string{operation.Image, cf, operation.Revision}
 	setFlags := make([]string, 0)
 
 	for _, v := range strFlags {

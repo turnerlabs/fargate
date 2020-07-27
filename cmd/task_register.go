@@ -8,7 +8,7 @@ import (
 )
 
 var flagTaskRegisterImage string
-var flagTaskRegisterDockerComposeFile string
+var flagTaskRegisterDockerComposeFile []string
 var flagTaskRegisterEnvVars []string
 var flagTaskRegisterEnvFile string
 var flagTaskRegisterSecretVars []string
@@ -21,7 +21,7 @@ type taskRegisterOperation struct {
 	Image       string
 	EnvVars     []string
 	EnvFile     string
-	ComposeFile string
+	ComposeFile []string
 	SecretVars  []string
 	SecretFile  string
 }
@@ -49,8 +49,8 @@ var taskRegisterCmd = &cobra.Command{
 			len(flagTaskRegisterSecretVars) > 0 ||
 			flagTaskRegisterSecretFile != "")
 
-		if (flagTaskRegisterDockerComposeFile != "" && nonComposeOptions) ||
-			(flagTaskRegisterDockerComposeFile == "" && !nonComposeOptions) {
+		if (len(flagTaskRegisterDockerComposeFile) > 0 && nonComposeOptions) ||
+			(len(flagTaskRegisterDockerComposeFile) == 0 && !nonComposeOptions) {
 			cmd.Help()
 			return
 		}
@@ -74,7 +74,7 @@ func init() {
 
 	taskRegisterCmd.Flags().StringVar(&flagTaskRegisterEnvFile, "env-file", "", "File containing list of environment variables to set, one per line, of the form KEY=value")
 
-	taskRegisterCmd.Flags().StringVarP(&flagTaskRegisterDockerComposeFile, "file", "f", "", "Docker Compose file containing image and environment variables to register.")
+	taskRegisterCmd.Flags().StringArrayVarP(&flagTaskRegisterDockerComposeFile, "file", "f", []string{}, "Docker Compose file containing image and environment variables to register.")
 
 	taskRegisterCmd.Flags().StringArrayVar(&flagTaskRegisterSecretVars, "secret", []string{}, "Secret variables to set [e.g. --secret KEY=valueFrom --secret KEY2=valueFrom]")
 
@@ -91,7 +91,7 @@ func registerTask(op taskRegisterOperation) {
 	var secrets []ECS.Secret
 	replaceVars := false
 
-	if op.ComposeFile != "" {
+	if len(op.ComposeFile) > 0 {
 		dockerService := getDockerServiceFromComposeFile(op.ComposeFile)
 		image = dockerService.Image
 		envvars = convertDockerComposeEnvVarsToECSEnvVars(dockerService)
