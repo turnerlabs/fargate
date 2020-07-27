@@ -6,7 +6,7 @@ import (
 
 func doTest(t *testing.T, f string) ComposeFile {
 	//round-trip unmarshal and marshal
-	file := Read(f)
+	file := Read([]string{f})
 	b, e := file.Yaml()
 	if e != nil {
 		t.Error(e)
@@ -24,45 +24,6 @@ const (
 	secretKey     = "QUX"
 	secretValue   = "arn:key:ssm:us-east-1:000000000000:parameter/path/to/my_parameter"
 )
-
-// 2
-func TestComposeV2(t *testing.T) {
-	f := doTest(t, "v2.yml")
-	svc := f.Data.Services["web"]
-	if svc.Image != image {
-		t.Error("expecting image")
-	}
-	if svc.Ports[0].Published != publishedPort {
-		t.Error("expecting published port")
-	}
-	if svc.Ports[0].Target != targetPort {
-		t.Error("expecting published port")
-	}
-	if svc.Labels[labelKey] != labelValue {
-		t.Error("expecting label")
-	}
-}
-
-// 2.4
-func TestComposeV24(t *testing.T) {
-	f := doTest(t, "v2.4.yml")
-	svc := f.Data.Services["web"]
-	if svc.Image != image {
-		t.Error("expecting image")
-	}
-	if svc.Ports[0].Published != publishedPort {
-		t.Error("expecting published port")
-	}
-	if svc.Ports[0].Target != targetPort {
-		t.Error("expecting published port")
-	}
-	if svc.Labels[labelKey] != labelValue {
-		t.Error("expecting label")
-	}
-	if svc.Secrets[secretKey] != secretValue {
-		t.Error("expecting secret")
-	}
-}
 
 // 3.2 short
 func TestComposeV32Short(t *testing.T) {
