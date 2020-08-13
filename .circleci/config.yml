@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: quay.io/turner/fargate-cli-build:1.14.7-test.0
+      - image: quay.io/turner/fargate-cli-build:1.14.7
     working_directory: /go/src/github.com/turnerlabs/fargate
     steps:
       - checkout
