@@ -116,6 +116,9 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) string {
 	ecsService := ecs.DescribeService(operation.ServiceName)
 
 	dockerService := getDockerServiceFromComposeFile(operation.ComposeFile)
+	if dockerService == nil {
+
+	}
 
 	envvars := convertDockerComposeEnvVarsToECSEnvVars(dockerService)
 	secrets := convertDockerComposeSecretsToECSSecrets(dockerService)
@@ -179,7 +182,10 @@ func deployImage(operation *ServiceDeployOperation) string {
 
 func getDockerServiceFromComposeFile(dockerComposeFile string) *dockercompose.Service {
 	//read the compose file configuration
-	composeFile := dockercompose.Read(dockerComposeFile)
+	composeFile, err := dockercompose.Read(dockerComposeFile)
+	if err != nil {
+		console.ErrorExit(err, "error reading docker compose file")
+	}
 
 	//determine which docker-compose service/container to deploy
 	_, dockerService := getDockerServiceToDeploy(&composeFile.Data)

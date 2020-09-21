@@ -1,18 +1,23 @@
 package dockercompose
 
 import (
+	"fmt"
 	"testing"
 )
 
-func doTest(t *testing.T, f string) ComposeFile {
+func doTest(t *testing.T, f string) (ComposeFile, error) {
 	//round-trip unmarshal and marshal
-	file := Read(f)
+	file, e := Read(f)
+	if e != nil {
+		return file, e
+	}
+	fmt.Println(file.Data)
 	b, e := file.Yaml()
 	if e != nil {
-		t.Error(e)
+		return file, e
 	}
 	t.Log(string(b))
-	return file
+	return file, nil
 }
 
 const (
@@ -27,7 +32,11 @@ const (
 
 // 2
 func TestComposeV2(t *testing.T) {
-	f := doTest(t, "v2.yml")
+	f, e := doTest(t, "v2.yml")
+	if e != nil {
+		t.Error(e)
+		return
+	}
 	svc := f.Data.Services["web"]
 	if svc.Image != image {
 		t.Error("expecting image")
@@ -45,7 +54,11 @@ func TestComposeV2(t *testing.T) {
 
 // 2.4
 func TestComposeV24(t *testing.T) {
-	f := doTest(t, "v2.4.yml")
+	f, e := doTest(t, "v2.4.yml")
+	if e != nil {
+		t.Error(e)
+		return
+	}
 	svc := f.Data.Services["web"]
 	if svc.Image != image {
 		t.Error("expecting image")
@@ -66,7 +79,12 @@ func TestComposeV24(t *testing.T) {
 
 // 3.2 short
 func TestComposeV32Short(t *testing.T) {
-	f := doTest(t, "v3.2-short.yml")
+	f, e := doTest(t, "v3.2-short.yml")
+	if e != nil {
+		t.Error(e)
+		return
+	}
+	fmt.Println(f.Data)
 	svc := f.Data.Services["web"]
 	if svc.Image != image {
 		t.Error("expecting image")
@@ -84,7 +102,11 @@ func TestComposeV32Short(t *testing.T) {
 
 // 3.2 long
 func TestComposeV32Long(t *testing.T) {
-	f := doTest(t, "v3.2-long.yml")
+	f, e := doTest(t, "v3.2-long.yml")
+	if e != nil {
+		t.Error(e)
+		return
+	}
 	svc := f.Data.Services["web"]
 	if svc.Image != image {
 		t.Error("expecting image")
@@ -102,7 +124,11 @@ func TestComposeV32Long(t *testing.T) {
 
 // 3.7
 func TestComposeV37(t *testing.T) {
-	f := doTest(t, "v3.7.yml")
+	f, e := doTest(t, "v3.7.yml")
+	if e != nil {
+		t.Error(e)
+		return
+	}
 	svc := f.Data.Services["web"]
 	if svc.Image != image {
 		t.Error("expecting image")
