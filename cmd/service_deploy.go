@@ -116,9 +116,6 @@ func deployDockerComposeFile(operation *ServiceDeployOperation) string {
 	ecsService := ecs.DescribeService(operation.ServiceName)
 
 	dockerService := getDockerServiceFromComposeFile(operation.ComposeFile)
-	if dockerService == nil {
-
-	}
 
 	envvars := convertDockerComposeEnvVarsToECSEnvVars(dockerService)
 	secrets := convertDockerComposeSecretsToECSSecrets(dockerService)
