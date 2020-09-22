@@ -59,15 +59,15 @@ func (composeFile *ComposeFile) Read() error {
 	}
 
 	//unmarshal the yaml
-	var compose DockerCompose
-	err := yaml.Unmarshal(outbuf.Bytes(), &compose)
+
+	//is the yaml using the long port syntax?
+	compose, err := UnmarshalComposeYAML(outbuf.Bytes())
 	if err != nil {
-		return err
+		return fmt.Errorf("unmarshalling docker compose yaml: %w", err)
 	}
 	if compose.Version == "" || len(compose.Services) == 0 {
 		return errors.New("unable to parse compose file")
 	}
-
 	composeFile.Data = compose
 	return nil
 }
