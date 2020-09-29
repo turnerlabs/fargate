@@ -2,6 +2,8 @@ package dockercompose
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"os/exec"
 
@@ -17,12 +19,13 @@ type ComposeFile struct {
 }
 
 //Read loads a docker-compose.yml file
-func Read(file string) ComposeFile {
+func Read(file string) (ComposeFile, error) {
 	result := ComposeFile{
 		File: file,
 	}
-	result.Read()
-	return result
+	var err error
+	err = result.Read()
+	return result, err
 }
 
 //New returns an initialized compose file
@@ -39,7 +42,7 @@ func New(file string) ComposeFile {
 
 //Read reads the data structure from the file
 //note that all variable interpolations are fully rendered
-func (composeFile *ComposeFile) Read() {
+func (composeFile *ComposeFile) Read() error {
 	console.Debug("running docker-compose config [%s]", composeFile.File)
 	cmd := exec.Command("docker-compose", "-f", composeFile.File, "config")
 
@@ -48,21 +51,25 @@ func (composeFile *ComposeFile) Read() {
 	cmd.Stderr = &errbuf
 
 	if err := cmd.Start(); err != nil {
-		console.ErrorExit(err, errbuf.String())
+		return fmt.Errorf("%v: %w", errbuf.String(), err)
 	}
 
 	if err := cmd.Wait(); err != nil {
-		console.IssueExit(errbuf.String())
+		return fmt.Errorf("%v: %w", errbuf.String(), err)
 	}
 
 	//unmarshal the yaml
-	var compose DockerCompose
-	err := yaml.Unmarshal(outbuf.Bytes(), &compose)
-	if err != nil {
-		console.ErrorExit(err, "error unmarshalling docker-compose.yml")
-	}
 
+	//is the yaml using the long port syntax?
+	compose, err := UnmarshalComposeYAML(outbuf.Bytes())
+	if err != nil {
+		return fmt.Errorf("unmarshalling docker compose yaml: %w", err)
+	}
+	if compose.Version == "" || len(compose.Services) == 0 {
+		return errors.New("unable to parse compose file")
+	}
 	composeFile.Data = compose
+	return nil
 }
 
 //AddService adds a service to a compose file

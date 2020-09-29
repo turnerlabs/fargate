@@ -4,7 +4,7 @@ services:
     build: .
     image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0
     ports:
-    - "80:8080"
+    - 80:8080/tcp
     environment:
       FOO: bar
     x-fargate-secrets:

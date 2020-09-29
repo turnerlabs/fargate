@@ -5,7 +5,6 @@ import (
 
 	"github.com/turnerlabs/fargate/console"
 	"github.com/turnerlabs/fargate/dockercompose"
-	yaml "gopkg.in/yaml.v2"
 )
 
 func TestGetDockerServiceToDeploy_Happy(t *testing.T) {
@@ -24,8 +23,7 @@ services:
 `
 
 	//unmarshal the yaml
-	var compose dockercompose.DockerCompose
-	err := yaml.Unmarshal([]byte(yml), &compose)
+	compose, err := dockercompose.UnmarshalComposeYAML([]byte(yml))
 	if err != nil {
 		console.ErrorExit(err, "error unmarshalling docker-compose.yml")
 	}
@@ -60,8 +58,7 @@ services:
 `
 
 	//unmarshal the yaml
-	var compose dockercompose.DockerCompose
-	err := yaml.Unmarshal([]byte(yml), &compose)
+	compose, err := dockercompose.UnmarshalComposeYAML([]byte(yml))
 	if err != nil {
 		console.ErrorExit(err, "error unmarshalling docker-compose.yml")
 	}
@@ -94,8 +91,7 @@ services:
 `
 
 	//unmarshal the yaml
-	var compose dockercompose.DockerCompose
-	err := yaml.Unmarshal([]byte(yml), &compose)
+	compose, err := dockercompose.UnmarshalComposeYAML([]byte(yml))
 	if err != nil {
 		console.ErrorExit(err, "error unmarshalling docker-compose.yml")
 	}
@@ -131,8 +127,7 @@ services:
 `
 
 	//unmarshal the yaml
-	var compose dockercompose.DockerCompose
-	err := yaml.Unmarshal([]byte(yml), &compose)
+	compose, err := dockercompose.UnmarshalComposeYAML([]byte(yml))
 	if err != nil {
 		console.ErrorExit(err, "error unmarshalling docker-compose.yml")
 	}

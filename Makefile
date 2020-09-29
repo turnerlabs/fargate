@@ -4,7 +4,7 @@ PACKAGES := $(shell go list ./... | grep -v /mock)
 BUILD_VERSION := $(shell git describe --tags)
 
 mocks:
-	go get github.com/golang/mock/mockgen
+	go mod vendor
 	go generate $(PACKAGES)
 
 test:

@@ -1,3 +1,11 @@
+## 0.9.0 (2020-09-29)
+
+### Bug Fixes
+
+- upgrades to go 1.14.7 including aws deps (closes #60) (#61)
+- fixes issue with docker compose yml (closes #62) (#63)
+
+
 ## 0.8.0 (2020-02-20)
 
 ### Enhancements

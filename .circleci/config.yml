@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: quay.io/turner/fargate-cli-build
+      - image: quay.io/turner/fargate-cli-build:1.14.7
     working_directory: /go/src/github.com/turnerlabs/fargate
     steps:
       - checkout
@@ -11,7 +11,6 @@ jobs:
           command: |
             git config --global user.email circleci@turnerlabs.io
             git config --global user.name CircleCI
-            dep ensure -v
       - run: 
           name: run tests
           command: make test
