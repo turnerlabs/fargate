@@ -8,6 +8,7 @@ import (
 )
 
 var flagTaskRegisterImage string
+var flagTaskReplaceVars bool
 var flagTaskRegisterDockerComposeFile string
 var flagTaskRegisterEnvVars []string
 var flagTaskRegisterEnvFile string
@@ -24,6 +25,7 @@ type taskRegisterOperation struct {
 	ComposeFile string
 	SecretVars  []string
 	SecretFile  string
+	replaceVars bool
 }
 
 var taskRegisterCmd = &cobra.Command{
@@ -40,6 +42,7 @@ var taskRegisterCmd = &cobra.Command{
 			ComposeFile: flagTaskRegisterDockerComposeFile,
 			SecretVars:  flagTaskRegisterSecretVars,
 			SecretFile:  flagTaskRegisterSecretFile,
+			replaceVars:  flagTaskReplaceVars,
 		}
 
 		//valid cli arg combinations
@@ -80,6 +83,8 @@ func init() {
 
 	taskRegisterCmd.Flags().StringVar(&flagTaskRegisterSecretFile, "secret-file", "", "File containing list of secret variables to set, one per line, of the form KEY=valueFrom")
 
+	taskRegisterCmd.Flags().BoolVar(&flagTaskReplaceVars, "replace-vars", false, "Replace the vars in the new image")
+
 	taskCmd.AddCommand(taskRegisterCmd)
 }
 
@@ -89,14 +94,13 @@ func registerTask(op taskRegisterOperation) {
 	image := op.Image
 	var envvars []ECS.EnvVar
 	var secrets []ECS.Secret
-	replaceVars := false
+	replaceVars := op.replaceVars
 
 	if op.ComposeFile != "" {
 		dockerService := getDockerServiceFromComposeFile(op.ComposeFile)
 		image = dockerService.Image
 		envvars = convertDockerComposeEnvVarsToECSEnvVars(dockerService)
 		secrets = convertDockerComposeSecretsToECSSecrets(dockerService)
-		replaceVars = true
 
 	} else {
 		//read env file (if specified) and combine with other envvars
@@ -105,8 +109,6 @@ func registerTask(op taskRegisterOperation) {
 		//read secrets file (if specified) and combine with other secret vars
 		secrets = processSecretVarArgs(op.SecretVars, op.SecretFile)
 
-		//don't replace, just add, update where exists
-		replaceVars = false
 	}
 
 	//update and register new task definition
