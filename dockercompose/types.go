@@ -9,6 +9,7 @@ import (
 
 // DockerCompose represents a docker-compose.yml file
 type DockerCompose struct {
+	Version  string              `yaml:"version,omitempty"`
 	Services map[string]*Service `yaml:"services"`
 	Networks map[string]*Network `yaml:"networks"`
 }
@@ -37,6 +38,7 @@ type Port struct {
 
 // used to parse the short syntax
 type dockerComposeShortPortSyntax struct {
+	Version  string                             `yaml:"version,omitempty"`
 	Services map[string]*serviceShortPortSyntax `yaml:"services"`
 }
 
