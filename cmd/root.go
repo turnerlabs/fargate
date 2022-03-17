@@ -102,18 +102,7 @@ CloudWatch Logs, and Amazon Route 53 into an easy-to-use CLI.`,
 			}
 		}
 
-		envAwsDefaultRegion := os.Getenv("AWS_DEFAULT_REGION")
-		envAwsRegion := os.Getenv("AWS_REGION")
-
-		if region == "" {
-			if envAwsDefaultRegion != "" {
-				region = envAwsDefaultRegion
-			} else if envAwsRegion != "" {
-				region = envAwsRegion
-			} else {
-				region = defaultRegion
-			}
-		}
+		region = getRegion()
 
 		if err := validateRegion(region); err != nil {
 			console.IssueExit(err.Error())
