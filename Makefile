@@ -3,6 +3,10 @@
 PACKAGES := $(shell go list ./... | grep -v /mock)
 BUILD_VERSION := $(shell git describe --tags)
 
+mocks:
+	go mod vendor
+	go generate $(PACKAGES)
+
 test:
 	go test -race -cover $(PACKAGES)
 
