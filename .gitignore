@@ -6,3 +6,5 @@ vendor
 Dockerfile.build
 fargate.yml
 docker-compose.yml
+develop
+master
