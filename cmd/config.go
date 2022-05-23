@@ -11,6 +11,7 @@ import (
 const (
 	keyCluster = "cluster"
 	keyService = "service"
+	keyRegion  = "region"
 	keyVerbose = "verbose"
 	keyNoColor = "nocolor"
 	keyTask    = "task"
@@ -36,11 +37,31 @@ func initConfig(cmd *cobra.Command) {
 	//cli arg
 	initPFlag(keyCluster, cmd)
 	initPFlag(keyVerbose, cmd)
+	initPFlag(keyRegion, cmd)
 	initPFlag(keyNoColor, cmd)
 }
 
 func initPFlag(key string, cmd *cobra.Command) {
 	viper.BindPFlag(key, cmd.PersistentFlags().Lookup(key))
+}
+
+//region can come from fargate.yml, AWS_REGION, AWS_DEFAULT_REGION or --region
+func getRegion() string {
+	result := viper.GetString(keyRegion)
+	if result == "" {
+		envAwsDefaultRegion := os.Getenv("AWS_DEFAULT_REGION")
+		envAwsRegion := os.Getenv("AWS_REGION")
+
+		if envAwsDefaultRegion != "" {
+			result = envAwsDefaultRegion
+		} else if envAwsRegion != "" {
+			result = envAwsRegion
+		} else {
+			result = defaultRegion
+		}
+	}
+
+	return result
 }
 
 //cluster can come from fargate.yml, FARGATE_CLUSTER envar, or --cluster cli arg
@@ -82,7 +103,6 @@ func getRuleName() string {
 	}
 	return result
 }
-
 
 func getVerbose() bool {
 	return viper.GetBool(keyVerbose)
