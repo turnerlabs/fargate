@@ -224,9 +224,14 @@ func (ecs *ECS) DescribeTaskDefinition(taskDefinitionArn string) *awsecs.Describ
 //UpdateTaskDefinitionImage registers a new task definition with the updated image
 func (ecs *ECS) UpdateTaskDefinitionImage(taskDefinitionArn, image string) string {
 	dtd := ecs.DescribeTaskDefinition(taskDefinitionArn)
-	dtd.TaskDefinition.ContainerDefinitions[0].Image = aws.String(image)
+	for i := 0; i < len(dtd.TaskDefinition.ContainerDefinitions); i++ {
+		dtd.TaskDefinition.ContainerDefinitions[i].Image = aws.String(image)
+	}
+	
 	return ecs.registerTaskDefinition(dtd)
 }
+
+
 
 //UpdateTaskDefinitionImageAndEnvVars creates a new, updated task definition
 // based on the specified image and env vars.
