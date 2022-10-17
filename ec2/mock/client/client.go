@@ -5,34 +5,35 @@
 package client
 
 import (
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
-// MockClient is a mock of Client interface
+// MockClient is a mock of Client interface.
 type MockClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockClientMockRecorder
 }
 
-// MockClientMockRecorder is the mock recorder for MockClient
+// MockClientMockRecorder is the mock recorder for MockClient.
 type MockClientMockRecorder struct {
 	mock *MockClient
 }
 
-// NewMockClient creates a new mock instance
+// NewMockClient creates a new mock instance.
 func NewMockClient(ctrl *gomock.Controller) *MockClient {
 	mock := &MockClient{ctrl: ctrl}
 	mock.recorder = &MockClientMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockClient) EXPECT() *MockClientMockRecorder {
 	return m.recorder
 }
 
-// AuthorizeAllSecurityGroupIngress mocks base method
+// AuthorizeAllSecurityGroupIngress mocks base method.
 func (m *MockClient) AuthorizeAllSecurityGroupIngress(arg0 string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AuthorizeAllSecurityGroupIngress", arg0)
@@ -40,13 +41,13 @@ func (m *MockClient) AuthorizeAllSecurityGroupIngress(arg0 string) error {
 	return ret0
 }
 
-// AuthorizeAllSecurityGroupIngress indicates an expected call of AuthorizeAllSecurityGroupIngress
+// AuthorizeAllSecurityGroupIngress indicates an expected call of AuthorizeAllSecurityGroupIngress.
 func (mr *MockClientMockRecorder) AuthorizeAllSecurityGroupIngress(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizeAllSecurityGroupIngress", reflect.TypeOf((*MockClient)(nil).AuthorizeAllSecurityGroupIngress), arg0)
 }
 
-// CreateDefaultSecurityGroup mocks base method
+// CreateDefaultSecurityGroup mocks base method.
 func (m *MockClient) CreateDefaultSecurityGroup() (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateDefaultSecurityGroup")
@@ -55,13 +56,13 @@ func (m *MockClient) CreateDefaultSecurityGroup() (string, error) {
 	return ret0, ret1
 }
 
-// CreateDefaultSecurityGroup indicates an expected call of CreateDefaultSecurityGroup
+// CreateDefaultSecurityGroup indicates an expected call of CreateDefaultSecurityGroup.
 func (mr *MockClientMockRecorder) CreateDefaultSecurityGroup() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDefaultSecurityGroup", reflect.TypeOf((*MockClient)(nil).CreateDefaultSecurityGroup))
 }
 
-// GetDefaultSecurityGroupID mocks base method
+// GetDefaultSecurityGroupID mocks base method.
 func (m *MockClient) GetDefaultSecurityGroupID() (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDefaultSecurityGroupID")
@@ -70,13 +71,13 @@ func (m *MockClient) GetDefaultSecurityGroupID() (string, error) {
 	return ret0, ret1
 }
 
-// GetDefaultSecurityGroupID indicates an expected call of GetDefaultSecurityGroupID
+// GetDefaultSecurityGroupID indicates an expected call of GetDefaultSecurityGroupID.
 func (mr *MockClientMockRecorder) GetDefaultSecurityGroupID() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDefaultSecurityGroupID", reflect.TypeOf((*MockClient)(nil).GetDefaultSecurityGroupID))
 }
 
-// GetDefaultSubnetIDs mocks base method
+// GetDefaultSubnetIDs mocks base method.
 func (m *MockClient) GetDefaultSubnetIDs() ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDefaultSubnetIDs")
@@ -85,13 +86,13 @@ func (m *MockClient) GetDefaultSubnetIDs() ([]string, error) {
 	return ret0, ret1
 }
 
-// GetDefaultSubnetIDs indicates an expected call of GetDefaultSubnetIDs
+// GetDefaultSubnetIDs indicates an expected call of GetDefaultSubnetIDs.
 func (mr *MockClientMockRecorder) GetDefaultSubnetIDs() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDefaultSubnetIDs", reflect.TypeOf((*MockClient)(nil).GetDefaultSubnetIDs))
 }
 
-// GetSubnetVPCID mocks base method
+// GetSubnetVPCID mocks base method.
 func (m *MockClient) GetSubnetVPCID(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSubnetVPCID", arg0)
@@ -100,7 +101,7 @@ func (m *MockClient) GetSubnetVPCID(arg0 string) (string, error) {
 	return ret0, ret1
 }
 
-// GetSubnetVPCID indicates an expected call of GetSubnetVPCID
+// GetSubnetVPCID indicates an expected call of GetSubnetVPCID.
 func (mr *MockClientMockRecorder) GetSubnetVPCID(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSubnetVPCID", reflect.TypeOf((*MockClient)(nil).GetSubnetVPCID), arg0)

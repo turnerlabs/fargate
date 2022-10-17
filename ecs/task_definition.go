@@ -289,6 +289,7 @@ func (ecs *ECS) registerTaskDefinition(dtd *awsecs.DescribeTaskDefinitionOutput)
 		RequiresCompatibilities: dtd.TaskDefinition.RequiresCompatibilities,
 		TaskRoleArn:             dtd.TaskDefinition.TaskRoleArn,
 		Volumes:                 dtd.TaskDefinition.Volumes,
+		RuntimePlatform:         dtd.TaskDefinition.RuntimePlatform,
 	}
 
 	//it's unfortunate that the tags aren't included in the task definition itself :(
