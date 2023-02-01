@@ -16,6 +16,7 @@ const (
 	detailSubnetId            = "subnetId"
 	startedByFormat           = "fargate:%s"
 	taskGroupStartedByPattern = "fargate:(.*)"
+	eniAttachmentType         = "ElasticNetworkInterface"
 )
 
 type Task struct {
@@ -228,13 +229,18 @@ func (ecs *ECS) DescribeTasks(taskIds []string) []Task {
 			)
 		}
 
-		if len(t.Attachments) == 1 {
-			for _, detail := range t.Attachments[0].Details {
-				switch aws.StringValue(detail.Name) {
-				case detailNetworkInterfaceId:
-					task.EniId = aws.StringValue(detail.Value)
-				case detailSubnetId:
-					task.SubnetId = aws.StringValue(detail.Value)
+		if len(t.Attachments) > 0 {
+			for _, attachment := range t.Attachments {
+				if *attachment.Type != eniAttachmentType {
+					continue
+				}
+				for _, detail := range attachment.Details {
+					switch aws.StringValue(detail.Name) {
+					case detailNetworkInterfaceId:
+						task.EniId = aws.StringValue(detail.Value)
+					case detailSubnetId:
+						task.SubnetId = aws.StringValue(detail.Value)
+					}
 				}
 			}
 		}
