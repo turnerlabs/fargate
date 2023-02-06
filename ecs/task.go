@@ -16,6 +16,7 @@ const (
 	detailSubnetId            = "subnetId"
 	startedByFormat           = "fargate:%s"
 	taskGroupStartedByPattern = "fargate:(.*)"
+	eniAttachmentType         = "ElasticNetworkInterface"
 )
 
 type Task struct {
@@ -228,19 +229,43 @@ func (ecs *ECS) DescribeTasks(taskIds []string) []Task {
 			)
 		}
 
-		if len(t.Attachments) == 1 {
-			for _, detail := range t.Attachments[0].Details {
-				switch aws.StringValue(detail.Name) {
-				case detailNetworkInterfaceId:
-					task.EniId = aws.StringValue(detail.Value)
-				case detailSubnetId:
-					task.SubnetId = aws.StringValue(detail.Value)
-				}
-			}
+		found, eniId, subnetId := determineENIDetails(t)
+
+		if found {
+			task.EniId = eniId
+			task.SubnetId = subnetId
 		}
 
 		tasks = append(tasks, task)
 	}
 
 	return tasks
+}
+
+func determineENIDetails(t *awsecs.Task) (bool, string, string) {
+	foundEni := false
+	var eniId, subnetId = "", ""
+
+	//if there are attachments in the task details
+	if len(t.Attachments) > 0 {
+		for _, attachment := range t.Attachments {
+			// only find network interface attachments
+			if *attachment.Type != eniAttachmentType {
+				continue
+			}
+			foundEni = true
+
+			// pull out the details for the network interface
+			for _, detail := range attachment.Details {
+				switch aws.StringValue(detail.Name) {
+				case detailNetworkInterfaceId:
+					eniId = aws.StringValue(detail.Value)
+				case detailSubnetId:
+					subnetId = aws.StringValue(detail.Value)
+				}
+			}
+		}
+	}
+
+	return foundEni, eniId, subnetId
 }
