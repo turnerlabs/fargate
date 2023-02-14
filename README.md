@@ -11,10 +11,16 @@ Deploy serverless containers to the cloud from your command line
 
 ## Install
 
-You can install the CLI with a curl utility script or by downloading the binary from the releases page. Once installed you'll get the `fargate` command.
+You can install the latest stable CLI with a curl utility script or by downloading the binary from the releases page. Once installed you'll get the `fargate` command.
 
 ```
 curl -s get-fargate.turnerlabs.io | sh
+```
+
+If you'd like to install the latest prerelease, use this command:
+
+```
+curl -s get-fargate.turnerlabs.io | RELEASE=develop sh
 ```
 
 ## Usage
