@@ -33,7 +33,6 @@ func New(file string) ComposeFile {
 	result := ComposeFile{
 		File: file,
 		Data: DockerCompose{
-			Version:  "3.7",
 			Services: make(map[string]*Service),
 		},
 	}
@@ -65,8 +64,8 @@ func (composeFile *ComposeFile) Read() error {
 	if err != nil {
 		return fmt.Errorf("unmarshalling docker compose yaml: %w", err)
 	}
-	if compose.Version == "" || len(compose.Services) == 0 {
-		return errors.New("unable to parse compose file")
+	if len(compose.Services) == 0 {
+		return errors.New("unable to parse compose file, no services found")
 	}
 	composeFile.Data = compose
 	return nil
