@@ -3,7 +3,7 @@ module github.com/turnerlabs/fargate
 go 1.17
 
 require (
-	github.com/aws/aws-sdk-go v1.44.190
+	github.com/aws/aws-sdk-go v1.44.253
 	github.com/golang/mock v1.6.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/kyokomi/emoji v2.2.4+incompatible
