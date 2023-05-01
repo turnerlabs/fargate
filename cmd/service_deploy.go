@@ -46,7 +46,7 @@ deployed revision.
 	Example: `
 fargate service deploy -i 123456789.dkr.ecr.us-east-1.amazonaws.com/my-service:1.0
 fargate service deploy -f docker-compose.yml
-fargate service deploy -r 37
+fargate service deploy -r 38
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		operation := &ServiceDeployOperation{
@@ -108,7 +108,7 @@ func deployService(operation *ServiceDeployOperation) {
 	}
 }
 
-//deploy a docker-compose.yml file to fargate
+// deploy a docker-compose.yml file to fargate
 func deployDockerComposeFile(operation *ServiceDeployOperation) string {
 	var taskDefinitionArn string
 
@@ -215,7 +215,7 @@ func convertDockerComposeSecretsToECSSecrets(service *dockercompose.Service) []E
 	return result
 }
 
-//determine which docker-compose service/container to deploy
+// determine which docker-compose service/container to deploy
 func getDockerServiceToDeploy(dc *dockercompose.DockerCompose) (string, *dockercompose.Service) {
 	//look for label if there's more than 1
 	var service *dockercompose.Service
@@ -235,7 +235,7 @@ func getDockerServiceToDeploy(dc *dockercompose.DockerCompose) (string, *dockerc
 	return name, service
 }
 
-//Check incompatible flag combinations
+// Check incompatible flag combinations
 func validateFlags(operation *ServiceDeployOperation) bool {
 	strFlags := []string{operation.Image, operation.ComposeFile, operation.Revision}
 	setFlags := make([]string, 0)

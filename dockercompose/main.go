@@ -11,14 +11,14 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-//ComposeFile represents a docker-compose.yml file
-//that can be manipulated
+// ComposeFile represents a docker-compose.yml file
+// that can be manipulated
 type ComposeFile struct {
 	File string
 	Data DockerCompose
 }
 
-//Read loads a docker-compose.yml file
+// Read loads a docker-compose.yml file
 func Read(file string) (ComposeFile, error) {
 	result := ComposeFile{
 		File: file,
@@ -28,20 +28,20 @@ func Read(file string) (ComposeFile, error) {
 	return result, err
 }
 
-//New returns an initialized compose file
+// New returns an initialized compose file
 func New(file string) ComposeFile {
 	result := ComposeFile{
 		File: file,
 		Data: DockerCompose{
-			Version:  "3.7",
+			Version:  "3.8",
 			Services: make(map[string]*Service),
 		},
 	}
 	return result
 }
 
-//Read reads the data structure from the file
-//note that all variable interpolations are fully rendered
+// Read reads the data structure from the file
+// note that all variable interpolations are fully rendered
 func (composeFile *ComposeFile) Read() error {
 	console.Debug("running docker-compose config [%s]", composeFile.File)
 	cmd := exec.Command("docker-compose", "-f", composeFile.File, "config")
@@ -72,7 +72,7 @@ func (composeFile *ComposeFile) Read() error {
 	return nil
 }
 
-//AddService adds a service to a compose file
+// AddService adds a service to a compose file
 func (composeFile *ComposeFile) AddService(name string) *Service {
 	result := &Service{}
 	result.Environment = make(map[string]string)
@@ -83,12 +83,12 @@ func (composeFile *ComposeFile) AddService(name string) *Service {
 	return result
 }
 
-//Yaml returns the yaml for this compose file
+// Yaml returns the yaml for this compose file
 func (composeFile *ComposeFile) Yaml() ([]byte, error) {
 	return yaml.Marshal(composeFile.Data)
 }
 
-//Write writes the data to a file
+// Write writes the data to a file
 func (composeFile *ComposeFile) Write() error {
 	bits, err := composeFile.Yaml()
 	if err != nil {

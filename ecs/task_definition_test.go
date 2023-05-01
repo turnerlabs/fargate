@@ -67,6 +67,10 @@ func TestResolveRevisionNumber_Absolute(t *testing.T) {
 	if ecs.ResolveRevisionNumber(taskDefinitionArn, "37") != "37" {
 		t.Error("Expected 37")
 	}
+
+	if ecs.ResolveRevisionNumber(taskDefinitionArn, "38") != "38" {
+		t.Error("Expected 38")
+	}
 }
 
 func TestResolveRevisionNumber_NegativeExpression(t *testing.T) {
