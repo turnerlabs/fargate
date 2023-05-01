@@ -9,7 +9,6 @@ import (
 
 // DockerCompose represents a docker-compose.yml file
 type DockerCompose struct {
-	Version  string              `yaml:"version"`
 	Services map[string]*Service `yaml:"services"`
 }
 
@@ -42,8 +41,8 @@ type serviceShortPortSyntax struct {
 	Labels      map[string]string `yaml:"labels,omitempty"`
 }
 
-//UnmarshalComposeYAML unmarshals yaml into a DockerCompose struct
-//handles versioning and schema issues
+// UnmarshalComposeYAML unmarshals yaml into a DockerCompose struct
+// handles versioning and schema issues
 func UnmarshalComposeYAML(yamlBytes []byte) (DockerCompose, error) {
 	var result DockerCompose
 
@@ -58,7 +57,6 @@ func UnmarshalComposeYAML(yamlBytes []byte) (DockerCompose, error) {
 	if err == nil {
 
 		//copy data from short types to result types
-		result.Version = short.Version
 		result.Services = make(map[string]*Service, len(short.Services))
 		for s, svc := range short.Services {
 
