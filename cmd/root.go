@@ -108,17 +108,21 @@ CloudWatch Logs, and Amazon Route 53 into an easy-to-use CLI.`,
 			console.IssueExit(err.Error())
 		}
 
-		config := &aws.Config{
-			Region: aws.String(region),
-		}
-
 		if getVerbose() {
-			config.LogLevel = aws.LogLevel(aws.LogDebugWithHTTPBody)
+			sess = session.Must(
+				session.NewSessionWithOptions(session.Options{
+					SharedConfigState: session.SharedConfigEnable,
+					Config:            aws.Config{Region: aws.String(region), LogLevel: aws.LogLevel(aws.LogDebugWithHTTPBody)},
+				}),
+			)
+		} else {
+			sess = session.Must(
+				session.NewSessionWithOptions(session.Options{
+					SharedConfigState: session.SharedConfigEnable,
+					Config:            aws.Config{Region: aws.String(region)},
+				}),
+			)
 		}
-
-		sess = session.Must(
-			session.NewSession(config),
-		)
 
 		_, err := sess.Config.Credentials.Get()
 
@@ -158,7 +162,7 @@ func init() {
 	initConfig(rootCmd)
 }
 
-//converts array of KEY=VALUE to array of EnvVar types
+// converts array of KEY=VALUE to array of EnvVar types
 func extractEnvVars(inputEnvVars []string) []ECS.EnvVar {
 	var envVars []ECS.EnvVar
 

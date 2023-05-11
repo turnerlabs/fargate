@@ -41,8 +41,8 @@ type serviceShortPortSyntax struct {
 	Labels      map[string]string `yaml:"labels,omitempty"`
 }
 
-//UnmarshalComposeYAML unmarshals yaml into a DockerCompose struct
-//handles versioning and schema issues
+// UnmarshalComposeYAML unmarshals yaml into a DockerCompose struct
+// handles versioning and schema issues
 func UnmarshalComposeYAML(yamlBytes []byte) (DockerCompose, error) {
 	var result DockerCompose
 
