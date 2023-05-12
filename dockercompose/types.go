@@ -23,8 +23,9 @@ type Service struct {
 
 // Port represents a port
 type Port struct {
-	Published int64 `yaml:"published"`
-	Target    int64 `yaml:"target"`
+	PublishedAsString string `yaml:"published"`
+	PublishedAsInt    int64
+	Target            int64 `yaml:"target"`
 }
 
 // used to parse the short syntax
@@ -73,8 +74,9 @@ func UnmarshalComposeYAML(yamlBytes []byte) (DockerCompose, error) {
 					return result, err
 				}
 				ports = append(ports, Port{
-					Published: published,
-					Target:    target,
+					PublishedAsInt:    published,
+					PublishedAsString: portString[0],
+					Target:            target,
 				})
 			}
 
@@ -87,12 +89,19 @@ func UnmarshalComposeYAML(yamlBytes []byte) (DockerCompose, error) {
 			}
 		}
 	} else { //error unmarshaling short syntax
-
 		//try long syntax
 		err := yaml.Unmarshal(yamlBytes, &result)
 		if err != nil {
 			return result, nil
 		}
+
+		for _, svc := range result.Services {
+			//convert ports
+			for i, _ := range svc.Ports {
+				svc.Ports[i].PublishedAsInt, _ = strconv.ParseInt(svc.Ports[i].PublishedAsString, 10, 64)
+			}
+		}
+
 	}
 
 	return result, nil

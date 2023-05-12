@@ -49,8 +49,8 @@ func describe(cmd *cobra.Command, args []string) {
 	//ports
 	for _, p := range container.PortMappings {
 		service.Ports = append(service.Ports, dockercompose.Port{
-			Published: *p.ContainerPort,
-			Target:    *p.ContainerPort,
+			PublishedAsInt: *p.ContainerPort,
+			Target:         *p.ContainerPort,
 		})
 	}
 
