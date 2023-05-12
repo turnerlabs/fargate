@@ -65,7 +65,7 @@ func (composeFile *ComposeFile) Read() error {
 		return fmt.Errorf("unmarshalling docker compose yaml: %w", err)
 	}
 	if len(compose.Services) == 0 {
-		return errors.New("unable to parse compose file")
+		return errors.New("unable to parse compose file, no services found")
 	}
 	composeFile.Data = compose
 	return nil

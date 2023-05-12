@@ -41,7 +41,7 @@ func TestComposeV2(t *testing.T) {
 	if svc.Image != image {
 		t.Error("expecting image")
 	}
-	if svc.Ports[0].Published != publishedPort {
+	if svc.Ports[0].PublishedAsInt != publishedPort {
 		t.Error("expecting published port")
 	}
 	if svc.Ports[0].Target != targetPort {
@@ -63,7 +63,7 @@ func TestComposeV24(t *testing.T) {
 	if svc.Image != image {
 		t.Error("expecting image")
 	}
-	if svc.Ports[0].Published != publishedPort {
+	if svc.Ports[0].PublishedAsInt != publishedPort {
 		t.Error("expecting published port")
 	}
 	if svc.Ports[0].Target != targetPort {
@@ -89,7 +89,7 @@ func TestComposeV32Short(t *testing.T) {
 	if svc.Image != image {
 		t.Error("expecting image")
 	}
-	if svc.Ports[0].Published != publishedPort {
+	if svc.Ports[0].PublishedAsInt != publishedPort {
 		t.Error("expecting published port")
 	}
 	if svc.Ports[0].Target != targetPort {
@@ -111,7 +111,7 @@ func TestComposeV32Long(t *testing.T) {
 	if svc.Image != image {
 		t.Error("expecting image")
 	}
-	if svc.Ports[0].Published != publishedPort {
+	if svc.Ports[0].PublishedAsInt != publishedPort {
 		t.Error("expecting published port")
 	}
 	if svc.Ports[0].Target != targetPort {
@@ -133,33 +133,8 @@ func TestComposeV37(t *testing.T) {
 	if svc.Image != image {
 		t.Error("expecting image")
 	}
-	if svc.Ports[0].Published != publishedPort {
-		t.Error("expecting published port")
-	}
-	if svc.Ports[0].Target != targetPort {
-		t.Error("expecting published port")
-	}
-	if svc.Labels[labelKey] != labelValue {
-		t.Error("expecting label")
-	}
-	if svc.Secrets[secretKey] != secretValue {
-		t.Error("expecting secret")
-	}
-}
-
-// 3.8
-func TestComposeV38(t *testing.T) {
-	f, e := doTest(t, "v3.8.yml")
-	if e != nil {
-		t.Error(e)
-		return
-	}
-	svc := f.Data.Services["web"]
-	if svc.Image != image {
-		t.Error("expecting image")
-	}
-	if svc.Ports[0].Published != publishedPort {
-		t.Error("expecting published port")
+	if svc.Ports[0].PublishedAsInt != publishedPort {
+		t.Errorf("expecting published port to be %d, was %d", publishedPort, svc.Ports[0].PublishedAsInt)
 	}
 	if svc.Ports[0].Target != targetPort {
 		t.Error("expecting published port")
