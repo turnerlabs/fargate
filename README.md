@@ -29,8 +29,7 @@ curl -s get-fargate.turnerlabs.io | RELEASE=develop sh
 
 #### Region
 
-By default, fargate uses *us-east-1* as this is the single region where AWS
-Fargate is available. The CLI accepts a --region parameter for future use and
+By default, fargate uses *us-east-1*. The CLI accepts a --region parameter and
 will honor *AWS_REGION* and *AWS_DEFAULT_REGION* environment settings. Note that
 specifying a region where all required services aren't available will return an
 error.
@@ -69,6 +68,7 @@ task: my-task
 rule: my-event-rule
 verbose: false
 nocolor: true
+region: us-east-1
 ```
 
 #### Global Flags

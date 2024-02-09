@@ -19,26 +19,16 @@ Thanks for your interest in the project!  We want to welcome contributors so we 
 
 ## Setup
 
-- Ensure you're using golang 1.10+.
+- Ensure you're using golang 1.17+.
 
   ```console
   go version
   ```
 
-- Install [`dep`][dep] if not present on your system. See their [installation
-  instructions][dep-install] and [releases page][dep-releases] for details.
-
-- Install the source code from GitHub
+- Run install the required dependencies
 
   ```console
-  go get github.com/turnerlabs/fargate
-  ```
-
-- Run `dep ensure` to install required dependencies
-
-  ```console
-  cd $GOPATH/src/github.com/turnerlabs/fargate
-  dep ensure
+  go mod tidy
   ```
 
 - Make sure you can run the tests
@@ -59,14 +49,13 @@ Thanks for your interest in the project!  We want to welcome contributors so we 
 - To build a binary for your platform run `make`
 
 - For cross-building for all supported platforms, run `make dist` which builds
-  binaries for darwin (64-bit) and linux (Arm, 32-bit, 64-bit).
+  binaries for Windows, darwin/MacOS (64-bit,M-series) and Linux (Arm, 32-bit, 64-bit).
 
 ## Making Changes
 
 * Create a feature branch from where you want to base your work.
-  * This is usually the `develop` branch.
-  * To quickly create a feature branch; `git checkout -b feature/my-feature`. Please avoid working directly on the
-    `master` branch.
+  * This is usually the `master` branch.
+  * To quickly create a feature branch; `git checkout -b feature/my-feature`. 
 * Make commits of logical units.
 * Run `go fmt ./cmd` before committing.
 * Make sure you have added the necessary tests for your changes.
@@ -74,17 +63,14 @@ Thanks for your interest in the project!  We want to welcome contributors so we 
 
 ## Submitting Changes
 
-* Push your changes to a feature branch in your fork of the repository.
-* Submit a pull request to the `develop` branch to the repository in the turnerlabs organization.
+* Push your changes to a feature branch in *your* fork of the repository.
+* Submit a pull request to the `master` branch to the repository in the turnerlabs organization.
 
 ## Release Process
 
-* After a feature pull request has been merged into the `develop` branch, a CI build will be automatically kicked off.  The CI build will run unit tests, do a multi-platform build and automatically deploy the build to the [Github releases](https://github.com/turnerlabs/fargate/releases) page as a pre-release using the latest tag (`git describe --tags`) as the version number.
-* After the core team decides which features will be included in the next release, a release branch is created (e.g., `release/v0.5`) from develop.
-* The `CHANGELOG.md` file is updated to document the release in the release branch.
-* The release branch is merged to `master`, tagged, and pushed (along with tags).
+* After a feature pull request has been merged into the `master` branch, a CI build will be automatically kicked off.  The CI build will run unit tests, do a multi-platform build and automatically deploy the build to the [Github releases](https://github.com/turnerlabs/fargate/releases) page as a pre-release using the latest tag (`git describe --tags`) as the version number.
+* After the core team decides which features will be included in the next release the maintainers will push a release version tag.
 * This will kick off a build that builds using the latest tag and deploys as a Github release.
-* The release branch is then merged back to `develop`, tagged for pre-release (to start next version, e.g. v0.6.0-pre) and pushed.
 
 ## Licensing
 
