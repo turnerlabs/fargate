@@ -39,11 +39,35 @@ func New(file string) ComposeFile {
 	return result
 }
 
+package main
+
+import (
+	"bytes"
+	"errors"
+	"fmt"
+	"os/exec"
+)
+
+// checkCommandAvailability checks if a command is available on the system.
+func checkCommandAvailability(command string) bool {
+	_, err := exec.LookPath(command)
+	return err == nil
+}
+
 // Read reads the data structure from the file
-// note that all variable interpolations are fully rendered
 func (composeFile *ComposeFile) Read() error {
-	console.Debug("running docker-compose config [%s]", composeFile.File)
-	cmd := exec.Command("docker-compose", "-f", composeFile.File, "config")
+	var commandName string
+	var cmd *exec.Cmd
+
+	if checkCommandAvailability("docker-compose") {
+		console.Debug("running docker-compose config [%s]", composeFile.File)
+		cmd = exec.Command("docker-compose", "-f", composeFile.File, "config")
+	} else if checkCommandAvailability("podman-compose") {
+		console.Debug("docker-compose is not available, defaulting to podman-compose. Running podman-compose config [%s]", composeFile.File)
+		cmd = exec.Command("podman-compose", "-f", composeFile.File, "config")
+	} else {
+		return errors.New("neither docker-compose nor podman-compose is available on the system")
+	}
 
 	var outbuf, errbuf bytes.Buffer
 	cmd.Stdout = &outbuf
@@ -62,7 +86,7 @@ func (composeFile *ComposeFile) Read() error {
 	//is the yaml using the long port syntax?
 	compose, err := UnmarshalComposeYAML(outbuf.Bytes())
 	if err != nil {
-		return fmt.Errorf("unmarshalling docker compose yaml: %w", err)
+		return fmt.Errorf("unmarshalling %s compose yaml: %w", commandName, err)
 	}
 	if len(compose.Services) == 0 {
 		return errors.New("unable to parse compose file, no services found")
