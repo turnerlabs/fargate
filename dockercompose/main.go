@@ -39,15 +39,6 @@ func New(file string) ComposeFile {
 	return result
 }
 
-package main
-
-import (
-	"bytes"
-	"errors"
-	"fmt"
-	"os/exec"
-)
-
 // checkCommandAvailability checks if a command is available on the system.
 func checkCommandAvailability(command string) bool {
 	_, err := exec.LookPath(command)
