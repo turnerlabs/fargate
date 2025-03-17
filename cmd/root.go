@@ -100,6 +100,9 @@ CloudWatch Logs, and Amazon Route 53 into an easy-to-use CLI.`,
 			if runtime.GOOS == runtimeMacOS && !noEmoji {
 				output.Emoji = true
 			}
+		} else {
+			console.Color = false
+			output.Color = false
 		}
 
 		region = getRegion()
