@@ -7,20 +7,20 @@ Deploy serverless containers to the cloud from your command line
 
 ![fargate](fargate.png "fargate")
 
-_fargate_ is a command-line interface to deploy containers to [AWS Fargate](https://aws.amazon.com/fargate/). Using _fargate_, developers can easily operate fargate services including things like: deploying applications (images and environment variables), monitoring deployments, viewing container logs, restarting and scaling.
+*fargate* is a command-line interface to deploy containers to [AWS Fargate](https://aws.amazon.com/fargate/). Using *fargate*, developers can easily operate fargate services including things like: deploying applications (images and environment variables), monitoring deployments, viewing container logs, restarting and scaling.
 
 ## Install
 
 You can install the latest stable CLI with a curl utility script or by downloading the binary from the releases page. Once installed you'll get the `fargate` command.
 
 ```
-curl -s https://fargate.get.turnerlabs.io | sh
+curl -s get-fargate.turnerlabs.io | sh
 ```
 
 If you'd like to install the latest prerelease, use this command:
 
 ```
-curl -s https://fargate.get.turnerlabs.io | RELEASE=develop sh
+curl -s get-fargate.turnerlabs.io | RELEASE=develop sh
 ```
 
 ## Usage
@@ -29,9 +29,9 @@ curl -s https://fargate.get.turnerlabs.io | RELEASE=develop sh
 
 #### Region
 
-By default, fargate uses _us-east-1_ as this is the single region where AWS
+By default, fargate uses *us-east-1* as this is the single region where AWS
 Fargate is available. The CLI accepts a --region parameter for future use and
-will honor _AWS_REGION_ and _AWS_DEFAULT_REGION_ environment settings. Note that
+will honor *AWS_REGION* and *AWS_DEFAULT_REGION* environment settings. Note that
 specifying a region where all required services aren't available will return an
 error.
 
@@ -54,7 +54,7 @@ the AWS SDK for Go documentation.
 
 #### Options
 
-There are several ways to specify parameters. Each item takes precedence over the item below it:
+There are several ways to specify parameters.  Each item takes precedence over the item below it:
 
 1. CLI arguments (e.g., `--cluster my-cluster`)
 
@@ -73,12 +73,12 @@ nocolor: true
 
 #### Global Flags
 
-| Flag       | Short | Default   | Description          |
-| ---------- | ----- | --------- | -------------------- |
-| --cluster  | -c    |           | ECS cluster name     |
-| --region   |       | us-east-1 | AWS region           |
-| --no-color |       | false     | Disable color output |
-| --verbose  | -v    | false     | Verbose output       |
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --cluster | -c | | ECS cluster name |
+| --region | | us-east-1 | AWS region |
+| --no-color | | false | Disable color output |
+| --verbose | -v | false | Verbose output |
 
 ### Commands
 
@@ -108,9 +108,9 @@ distribute traffic amongst the tasks in your service.
 
 ##### Flags
 
-| Flag      | Short | Default | Description      |
-| --------- | ----- | ------- | ---------------- |
-| --service | -s    |         | ECS service name |
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --service | -s | | ECS service name |
 
 ##### fargate service list
 
@@ -131,6 +131,7 @@ Deploy new image to service
 The Docker container image to use in the service can be specified
 via the --image flag.
 
+
 ```console
 fargate service deploy [--file docker-compose.yml]
 ```
@@ -139,7 +140,7 @@ Deploy image, environment variables, and secrets defined in a [docker compose fi
 
 Deploy a docker [image](https://docs.docker.com/compose/compose-file/#image) and [environment variables](https://docs.docker.com/compose/environment-variables/) defined in a docker compose file together as a single unit. Note that environments variables and secrets are replaced with what's in the compose file.
 
-Secrets can be defined as key-value pairs under the docker compose file extension field `x-fargate-secrets`. To use extension fields, the compose file version must be at least `2.4` for the 2.x series or at least `3.7` for the 3.x series.
+Secrets can be defined as key-value pairs under the docker compose file extension field `x-fargate-secrets`. To use extension fields, the compose file version must be  at least `2.4` for the 2.x series or at least `3.7` for the 3.x series.
 
 This allows you to run `docker-compose up` locally to run your app the same way it will run in AWS. Note that while the docker-compose yaml configuration supports numerous options, only the image and environment variables are deployed to fargate. If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy. For example:
 
@@ -150,12 +151,12 @@ services:
     build: .
     image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-service:0.1.0
     ports:
-      - 80:5000
+    - 80:5000
     environment:
       FOO: bar
       BAZ: bam
     env_file:
-      - hidden.env
+    - hidden.env
     x-fargate-secrets:
       QUX: arn:key:ssm:us-east-1:000000000000:parameter/path/to/my_parameter
     labels:
@@ -167,7 +168,7 @@ services:
 ##### fargate service info
 
 ```console
-fargate service info
+fargate service info 
 ```
 
 Inspect service
@@ -204,10 +205,10 @@ A specific window of logs can be requested by passing --start and --end options
 with a time expression. The time expression can be either a duration or a
 timestamp:
 
-- Duration (e.g. -1h [one hour ago], -1h10m30s [one hour, ten minutes, and
-  thirty seconds ago], 2h [two hours from now])
-- Timestamp with optional timezone in the format of YYYY-MM-DD HH:MM:SS [TZ];
-  timezone will default to UTC if omitted (e.g. 2017-12-22 15:10:03 EST)
+  - Duration (e.g. -1h [one hour ago], -1h10m30s [one hour, ten minutes, and
+    thirty seconds ago], 2h [two hours from now])
+  - Timestamp with optional timezone in the format of YYYY-MM-DD HH:MM:SS [TZ];
+    timezone will default to UTC if omitted (e.g. 2017-12-22 15:10:03 EST)
 
 You can filter logs for specific term by passing a filter expression via the
 --filter flag. Pass a single term to search for that term, pass multiple terms
@@ -248,17 +249,17 @@ fargate service env set [--env <key=value>] [--file <pathname>]
 Set environment variables and secrets
 
 At least one environment variable or secret must be specified via either the --env,
---file, --secret, or --secret-file flags. You may specify any number of variables on the command line by
+--file,  --secret, or --secret-file flags. You may specify any number of variables on the command line by
 repeating --env before each one, or else place multiple variables in a text
 file, one per line, and specify the filename with --file and/or --secret-file.
 
 Each --env and --secret parameter string or line in the file must be of the form
 "key=value", with no quotation marks and no whitespace around the "=" unless you want
-literal leading whitespace in the value. Additionally, the "key" side must be
+literal leading whitespace in the value.  Additionally, the "key" side must be
 a legal shell identifier, which means it must start with an ASCII letter A-Z or
 underscore and consist of only letters, digits, and underscores.
 
-The "value" in "key=value" for each --secret flag should reference the ARN to the AWS Secrets Manager secret or AWS Systems Manager Parameter Store parameter.
+The "value" in "key=value" for each --secret flag should reference the ARN to the AWS Secrets Manager secret or AWS Systems Manager Parameter Store parameter. 
 
 ##### fargate service env unset
 
@@ -281,10 +282,10 @@ Show environment variables
 
 ##### fargate service update
 
-| Flag     | Short | Default | Description                                   |
-| -------- | ----- | ------- | --------------------------------------------- |
-| --cpu    |       |         | Amount of cpu units to allocate for each task |
-| --memory | -m    |         | Amount of MiB to allocate for each task       |
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --cpu | | | Amount of cpu units to allocate for each task |
+| --memory | -m | | Amount of MiB to allocate for each task |
 
 ```console
 fargate service update [--cpu <cpu-units>] [--memory <MiB>]
@@ -310,7 +311,7 @@ At least one of --cpu or --memory must be specified.
 ##### fargate service restart
 
 ```console
-fargate service restart
+fargate service restart 
 ```
 
 Restart service
@@ -319,13 +320,14 @@ Creates a new set of tasks for the service and stops the previous tasks. This
 is useful if your service needs to reload data cached from an external source,
 for example.
 
+
 #### Tasks
 
 ##### Flags
 
-| Flag   | Short | Default | Description            |
-| ------ | ----- | ------- | ---------------------- |
-| --task | -t    |         | Task Definition Family |
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --task | -t | | Task Definition Family |
 
 Tasks are one-time executions of your container. Instances of your task are run
 until you manually stop them either through AWS APIs, the AWS Management
@@ -335,10 +337,11 @@ Console, or until they are interrupted for any reason.
 - [describe](#fargate-task-describe)
 - [logs](#fargate-task-logs)
 
+
 ##### fargate task register
 
 ```console
-fargate task register [--image <docker-image>]
+fargate task register [--image <docker-image>] 
                       [-e KEY=value -e KEY2=value] [--env-file dev.env]
                       [--secret KEY3=valueFrom] [--secret-file secrets.env]
 ```
@@ -352,15 +355,17 @@ The environment variables can be specified using one or many `--env` flags or th
 
 The secrets can be specified using one or many `--secret` flags or the `--secret-file` flag.
 
+
 ```console
 fargate task register [--file docker-compose.yml]
 ```
 
 Registers a new [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) using the [image](https://docs.docker.com/compose/compose-file/#image), [environment variables](https://docs.docker.com/compose/environment-variables/), and secrets defined in a docker compose file. Note that environments variables are replaced with what's in the compose file.
 
-Secrets can be defined as key-value pairs under the docker compose file extension field `x-fargate-secrets`. To use extension fields, the compose file version must be at least `2.4` for the 2.x series or at least `3.7` for the 3.x series.
+Secrets can be defined as key-value pairs under the docker compose file extension field `x-fargate-secrets`. To use extension fields, the compose file version must be  at least `2.4` for the 2.x series or at least `3.7` for the 3.x series.
 
 If the docker compose file defines more than one container, you can use the [label](https://docs.docker.com/compose/compose-file/#labels) `aws.ecs.fargate.deploy: 1` to indicate which container you would like to deploy.
+
 
 ##### fargate task describe
 
@@ -370,14 +375,14 @@ fargate task describe
 
 The describe command describes a [Task Definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html) in [Docker Compose](https://docs.docker.com/compose/overview/) format. The Docker image, environment variables, secrets, and target port are the mapped elements.
 
-This command can be useful for looking at changes made by the `task register`, `service deploy`, or `service env set` commands. It can also be useful for running a task definition locally for debugging or troubleshooting purposes.
+This command can be useful for looking at changes made by the `task register`, `service deploy`, or `service env set` commands.  It can also be useful for running a task definition locally for debugging or troubleshooting purposes.
 
 ```sh
 fargate task describe -t my-app > docker-compose.yml
 docker-compose up
 ```
 
-You can specify the task definition family by using a `fargate.yml` file, the `FARGATE_TASK` envvar, or using
+You can specify the task definition family by using a `fargate.yml` file, the `FARGATE_TASK` envvar, or using 
 the `-t` flag, including an optional revision number.
 
 ```sh
@@ -393,23 +398,24 @@ services:
   app:
     image: 1234567890.dkr.ecr.us-east-1.amazonaws.com/my-app:1.0
     ports:
-      - published: 8080
-        target: 8080
+    - published: 8080
+      target: 8080
     environment:
       AWS_REGION: us-east-1
       ENVIRONMENT: dev
       FOO: bar
     x-fargate-secrets:
-      KEY: arn:key:ssm:us-east-1:000000000000:parameter/path/to/my_parameter
+      KEY: arn:key:ssm:us-east-1:000000000000:parameter/path/to/my_parameter      
     labels:
       aws.ecs.fargate.deploy: "1"
 ```
+
 
 ##### fargate task logs
 
 ```console
 fargate task logs [--follow] [--start <time-expression>] [--end <time-expression>]
-                  [--filter <filter-expression>] [--task <task-id>]
+                  [--filter <filter-expression>] [--task <task-id>] 
                   [--container-name] [--time] [--no-prefix]
 ```
 
@@ -436,10 +442,10 @@ A specific window of logs can be requested by passing `--start` and `--end` opti
 with a time expression. The time expression can be either a duration or a
 timestamp:
 
-- Duration (e.g. -1h [one hour ago], -1h10m30s [one hour, ten minutes, and
-  thirty seconds ago], 2h [two hours from now])
-- Timestamp with optional timezone in the format of YYYY-MM-DD HH:MM:SS [TZ];
-  timezone will default to UTC if omitted (e.g. 2017-12-22 15:10:03 EST)
+  - Duration (e.g. -1h [one hour ago], -1h10m30s [one hour, ten minutes, and
+    thirty seconds ago], 2h [two hours from now])
+  - Timestamp with optional timezone in the format of YYYY-MM-DD HH:MM:SS [TZ];
+    timezone will default to UTC if omitted (e.g. 2017-12-22 15:10:03 EST)
 
 You can filter logs for specific term by passing a filter expression via the
 `--filter` flag. Pass a single term to search for that term, pass multiple terms
@@ -449,17 +455,19 @@ to search for log messages that include all terms.
 
 `--no-prefix` excludes the log stream prefix from the output
 
+
 #### Events
 
 ##### Flags
 
-| Flag   | Short | Default | Description            |
-| ------ | ----- | ------- | ---------------------- |
-| --rule | -r    |         | CloudWatch Events Rule |
+| Flag | Short | Default | Description |
+| --- | --- | --- | --- |
+| --rule | -r | | CloudWatch Events Rule |
 
 The `events` command provides subcommands for working with [CloudWatch Events](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/WhatIsCloudWatchEvents.html) (scheduled tasks, etc.)
 
 - [target](#fargate-events-target)
+
 
 ##### fargate events target
 
@@ -470,11 +478,11 @@ fargate events target --revision <revision>
 "Deploys" (causes the next event rule invocation to run the new version) a task definition revision to a CloudWatch Event Rule by updating the rule target's `EcsParameters.TaskDefinitionArn`.
 
 A typical CI/CD system might do something like:
-
 ```console
 REVISION=$(fargate task register -i 123456789.dkr.ecr.us-east-1.amazonaws.com/my-app:${VERSION}-${CIRCLE_BUILD_NUM} -e FOO=bar)
 fargate events target -r ${REVISION}
 ```
+
 
 [region-table]: https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/
 [go-sdk]: https://aws.amazon.com/documentation/sdk-for-go/
