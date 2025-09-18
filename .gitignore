@@ -8,3 +8,4 @@ fargate.yml
 docker-compose.yml
 develop
 master
+.vscode
