@@ -100,7 +100,7 @@ func TestRegion(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	region = "ap-south-1"
+	region = "eu-west-3"
 	err = validateRegion(region)
 	if err != nil {
 		t.Error(err)
