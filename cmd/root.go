@@ -11,6 +11,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/spf13/cobra"
 	"github.com/turnerlabs/fargate/console"
@@ -44,22 +45,6 @@ CPU (CPU Units)    Memory (MiB)
 2048               4096 through 16384 in 1GiB increments
 4096               8192 through 30720 in 1GiB increments
 `)
-
-var validRegions = []string{
-	"us-east-1",
-	"us-east-2",
-	"us-west-1",
-	"us-west-2",
-	"ca-central-1",
-	"eu-west-1",
-	"eu-west-2",
-	"eu-central-1",
-	"ap-southeast-1",
-	"ap-southeast-2",
-	"ap-northeast-1",
-	"ap-northheast-2",
-	"ap-south-1",
-}
 
 var (
 	clusterName string
@@ -262,15 +247,10 @@ func validateMebibytes(mebibytes, min, max int64) bool {
 }
 
 func validateRegion(region string) error {
-	found := false
-	for _, validRegion := range validRegions {
-		if region == validRegion {
-			found = true
-			break
+	for _, p := range endpoints.DefaultPartitions() {
+		if _, ok := p.Regions()[region]; ok {
+			return nil // Region is valid
 		}
 	}
-	if !found {
-		return fmt.Errorf("Invalid region: %s [valid regions: %s]", region, strings.Join(validRegions, ", "))
-	}
-	return nil
+	return fmt.Errorf("invalid region: %s", region)
 }

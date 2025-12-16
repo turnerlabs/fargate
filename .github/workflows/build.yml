@@ -4,6 +4,9 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: write
+
 jobs:
   test:
     name: Test
@@ -12,7 +15,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Install Go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v6
         with:
           go-version: 1.24
 
