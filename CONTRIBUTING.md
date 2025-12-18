@@ -77,7 +77,6 @@ generate` directly
 ## Release Process
 
 - After a feature pull request has been merged into the `master` branch, a maintainer will tag it with a pre-release number which will trigger the creation of a release.
-- The release branch is merged to `master`, tagged, and pushed (along with tags).
 - After sufficient testing, this feature will be included in a full release with a normal version tag.
 
 ## Licensing
